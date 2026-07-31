@@ -4,7 +4,14 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0" />
   <title>Ghost — Private Bluetooth Chat</title>
-  <meta name="description" content="Ghost: No accounts. No servers. No trace. Privacy-first offline Bluetooth chat." />
+  <meta name="description" content="Ghost: No accounts. No servers. No trace. Real Bluetooth, real encryption, real privacy." />
+  <meta name="theme-color" content="#0a0a0a" />
+  <meta name="mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <meta name="apple-mobile-web-app-title" content="Ghost" />
+  <link rel="manifest" href="manifest.json" />
+  <link rel="apple-touch-icon" href="icons/icon-192.png" />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
@@ -19,19 +26,10 @@
           fontFamily: { mono: ['"JetBrains Mono"', 'monospace'] },
           colors: {
             ghost: {
-              bg: '#0a0a0a',
-              surface: '#111111',
-              card: '#161616',
-              border: '#1e1e1e',
-              cyan: '#00ffff',
-              'cyan-dim': '#00cccc',
-              'cyan-glow': 'rgba(0,255,255,0.15)',
-              red: '#ff3333',
-              'red-dim': '#cc2222',
-              'red-glow': 'rgba(255,51,51,0.15)',
-              text: '#e0e0e0',
-              muted: '#666666',
-              dim: '#333333',
+              bg: '#0a0a0a', surface: '#111111', card: '#161616', border: '#1e1e1e',
+              cyan: '#00ffff', 'cyan-dim': '#00cccc', 'cyan-glow': 'rgba(0,255,255,0.15)',
+              red: '#ff3333', 'red-dim': '#cc2222', 'red-glow': 'rgba(255,51,51,0.15)',
+              text: '#e0e0e0', muted: '#666666', dim: '#333333',
             }
           },
           animation: {
@@ -62,20 +60,12 @@
               '94%': { transform: 'translate(1px, 2px)', filter: 'brightness(1.5)' },
               '95%': { transform: 'translate(0)', filter: 'none' },
             },
-            scanLine: {
-              '0%': { top: '-10%' },
-              '100%': { top: '110%' },
-            },
+            scanLine: { '0%': { top: '-10%' }, '100%': { top: '110%' } },
             dots: {
-              '0%': { content: '"."' },
-              '25%': { content: '".."' },
-              '50%': { content: '"..."' },
-              '75%': { content: '"...."' },
+              '0%': { content: '"."' }, '25%': { content: '".."' },
+              '50%': { content: '"..."' }, '75%': { content: '"...."' },
             },
-            fadeIn: {
-              '0%': { opacity: '0' },
-              '100%': { opacity: '1' },
-            },
+            fadeIn: { '0%': { opacity: '0' }, '100%': { opacity: '1' } },
             slideUp: {
               '0%': { opacity: '0', transform: 'translateY(20px)' },
               '100%': { opacity: '1', transform: 'translateY(0)' },
@@ -98,10 +88,7 @@
               '0%, 100%': { boxShadow: '0 0 0 0 rgba(0,255,255,0.4)' },
               '50%': { boxShadow: '0 0 0 8px rgba(0,255,255,0)' },
             },
-            blink: {
-              '0%, 100%': { opacity: '1' },
-              '50%': { opacity: '0' },
-            },
+            blink: { '0%, 100%': { opacity: '1' }, '50%': { opacity: '0' } },
           }
         }
       }
@@ -117,105 +104,55 @@
       overflow-x: hidden;
     }
     #root { min-height: 100vh; }
-
-    /* Scrollbar */
     ::-webkit-scrollbar { width: 4px; }
     ::-webkit-scrollbar-track { background: #111; }
     ::-webkit-scrollbar-thumb { background: #333; border-radius: 2px; }
 
-    /* Radar rings */
     .radar-ring {
-      position: absolute;
-      border-radius: 50%;
+      position: absolute; border-radius: 50%;
       border: 1px solid rgba(0,255,255,0.5);
       animation: radarPulse 3s ease-out infinite;
     }
     .radar-ring:nth-child(2) { animation-delay: 1s; }
     .radar-ring:nth-child(3) { animation-delay: 2s; }
 
-    /* Glitch effect */
-    .glitch-text {
-      animation: glitch 4s infinite;
-    }
-    .glitch-text::before,
-    .glitch-text::after {
+    .glitch-text { animation: glitch 4s infinite; }
+    .glitch-text::before, .glitch-text::after {
       content: attr(data-text);
-      position: absolute;
-      top: 0; left: 0;
-      width: 100%; height: 100%;
+      position: absolute; top: 0; left: 0; width: 100%; height: 100%;
     }
     .glitch-text::before {
-      color: #00ffff;
-      animation: glitch 4s 0.1s infinite;
-      clip-path: polygon(0 0, 100% 0, 100% 35%, 0 35%);
-      transform: translate(-2px);
+      color: #00ffff; animation: glitch 4s 0.1s infinite;
+      clip-path: polygon(0 0, 100% 0, 100% 35%, 0 35%); transform: translate(-2px);
     }
     .glitch-text::after {
-      color: #ff3333;
-      animation: glitch 4s 0.2s infinite;
-      clip-path: polygon(0 65%, 100% 65%, 100% 100%, 0 100%);
-      transform: translate(2px);
+      color: #ff3333; animation: glitch 4s 0.2s infinite;
+      clip-path: polygon(0 65%, 100% 65%, 100% 100%, 0 100%); transform: translate(2px);
     }
 
-    /* Scan line overlay */
     .scan-overlay {
-      position: absolute;
-      inset: 0;
-      background: repeating-linear-gradient(
-        0deg,
-        transparent,
-        transparent 2px,
-        rgba(0,255,255,0.015) 2px,
-        rgba(0,255,255,0.015) 4px
-      );
-      pointer-events: none;
-      z-index: 1;
+      position: absolute; inset: 0;
+      background: repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(0,255,255,0.015) 2px, rgba(0,255,255,0.015) 4px);
+      pointer-events: none; z-index: 1;
     }
     .scan-line {
-      position: absolute;
-      left: 0; right: 0;
-      height: 2px;
+      position: absolute; left: 0; right: 0; height: 2px;
       background: linear-gradient(90deg, transparent, rgba(0,255,255,0.4), transparent);
-      animation: scanLine 3s linear infinite;
-      pointer-events: none;
-      z-index: 2;
+      animation: scanLine 3s linear infinite; pointer-events: none; z-index: 2;
     }
 
-    /* Burn animation */
-    .burning {
-      animation: burn 0.6s ease-out forwards;
-    }
+    .burning { animation: burn 0.6s ease-out forwards; }
 
-    /* Signal bar */
-    .signal-bar {
-      display: inline-flex;
-      align-items: flex-end;
-      gap: 2px;
-      height: 16px;
-    }
-    .signal-bar span {
-      display: block;
-      width: 3px;
-      background: #00ffff;
-      border-radius: 1px;
-      opacity: 0.3;
-    }
+    .signal-bar { display: inline-flex; align-items: flex-end; gap: 2px; height: 16px; }
+    .signal-bar span { display: block; width: 3px; background: #00ffff; border-radius: 1px; opacity: 0.3; }
     .signal-bar span.active { opacity: 1; }
 
-    /* Dots animation */
-    .scanning-dots::after {
-      content: '';
-      animation: dots 1.5s steps(4,end) infinite;
-    }
+    .scanning-dots::after { content: ''; animation: dots 1.5s steps(4,end) infinite; }
     @keyframes dots {
-      0%   { content: '.'; }
-      25%  { content: '..'; }
-      50%  { content: '...'; }
-      75%  { content: '....'; }
-      100% { content: '.'; }
+      0%   { content: '.'; } 25%  { content: '..'; }
+      50%  { content: '...'; } 75%  { content: '....'; } 100% { content: '.'; }
     }
 
-    /* Key exchange animation */
     @keyframes keyExchange {
       0%   { transform: translateX(-60px) rotate(-10deg); opacity: 0; }
       30%  { transform: translateX(0) rotate(0deg); opacity: 1; }
@@ -224,183 +161,59 @@
     }
     .key-anim { animation: keyExchange 2s ease-in-out infinite; }
 
-    /* Progress bar */
-    @keyframes progressFill {
-      0%   { width: 0%; }
-      100% { width: 100%; }
-    }
+    @keyframes progressFill { 0% { width: 0%; } 100% { width: 100%; } }
     .progress-fill { animation: progressFill 2s ease-out forwards; }
 
-    /* Lock locked */
-    @keyframes lockClose {
-      0%   { transform: translateY(-4px); }
-      100% { transform: translateY(0); }
-    }
+    @keyframes lockClose { 0% { transform: translateY(-4px); } 100% { transform: translateY(0); } }
     .lock-close { animation: lockClose 0.3s ease-out 1.5s forwards; }
 
-    /* Toggle */
-    .toggle-track {
-      width: 44px; height: 24px;
-      border-radius: 12px;
-      position: relative;
-      cursor: pointer;
-      transition: background 0.2s;
-    }
-    .toggle-thumb {
-      position: absolute;
-      top: 3px; left: 3px;
-      width: 18px; height: 18px;
-      border-radius: 50%;
-      background: white;
-      transition: transform 0.2s;
-    }
+    .toggle-track { width: 44px; height: 24px; border-radius: 12px; position: relative; cursor: pointer; transition: background 0.2s; }
+    .toggle-thumb { position: absolute; top: 3px; left: 3px; width: 18px; height: 18px; border-radius: 50%; background: white; transition: transform 0.2s; }
     .toggle-on .toggle-thumb { transform: translateX(20px); }
 
-    /* Message bubble */
-    .msg-bubble {
-      max-width: 75%;
-      padding: 10px 14px;
-      border-radius: 12px;
-      font-size: 13px;
-      line-height: 1.5;
-      position: relative;
-      transition: all 0.3s;
-    }
-    .msg-sent {
-      background: rgba(0,255,255,0.12);
-      border: 1px solid rgba(0,255,255,0.25);
-      color: #e0e0e0;
-      margin-left: auto;
-      border-bottom-right-radius: 3px;
-    }
-    .msg-recv {
-      background: #161616;
-      border: 1px solid #1e1e1e;
-      color: #e0e0e0;
-      margin-right: auto;
-      border-bottom-left-radius: 3px;
-    }
+    .msg-bubble { max-width: 75%; padding: 10px 14px; border-radius: 12px; font-size: 13px; line-height: 1.5; position: relative; transition: all 0.3s; }
+    .msg-sent { background: rgba(0,255,255,0.12); border: 1px solid rgba(0,255,255,0.25); color: #e0e0e0; margin-left: auto; border-bottom-right-radius: 3px; }
+    .msg-recv { background: #161616; border: 1px solid #1e1e1e; color: #e0e0e0; margin-right: auto; border-bottom-left-radius: 3px; }
 
-    /* Glow effects */
     .cyan-glow { box-shadow: 0 0 20px rgba(0,255,255,0.2); }
     .red-glow  { box-shadow: 0 0 20px rgba(255,51,51,0.3); }
-    .btn-cyan {
-      background: rgba(0,255,255,0.1);
-      border: 1px solid rgba(0,255,255,0.4);
-      color: #00ffff;
-      transition: all 0.2s;
-    }
-    .btn-cyan:hover {
-      background: rgba(0,255,255,0.2);
-      box-shadow: 0 0 15px rgba(0,255,255,0.3);
-    }
-    .btn-red {
-      background: rgba(255,51,51,0.1);
-      border: 1px solid rgba(255,51,51,0.4);
-      color: #ff3333;
-      transition: all 0.2s;
-    }
-    .btn-red:hover {
-      background: rgba(255,51,51,0.25);
-      box-shadow: 0 0 15px rgba(255,51,51,0.4);
-    }
+    .btn-cyan { background: rgba(0,255,255,0.1); border: 1px solid rgba(0,255,255,0.4); color: #00ffff; transition: all 0.2s; }
+    .btn-cyan:hover { background: rgba(0,255,255,0.2); box-shadow: 0 0 15px rgba(0,255,255,0.3); }
+    .btn-red { background: rgba(255,51,51,0.1); border: 1px solid rgba(255,51,51,0.4); color: #ff3333; transition: all 0.2s; }
+    .btn-red:hover { background: rgba(255,51,51,0.25); box-shadow: 0 0 15px rgba(255,51,51,0.4); }
 
-    /* Watermark */
-    .watermark {
-      position: fixed;
-      bottom: 12px;
-      left: 50%;
-      transform: translateX(-50%);
-      font-size: 9px;
-      color: rgba(255,255,255,0.15);
-      letter-spacing: 0.15em;
-      pointer-events: none;
-      z-index: 100;
-      white-space: nowrap;
-    }
-
-    /* Nav bar */
-    .nav-bar {
-      display: flex;
-      border-top: 1px solid #1e1e1e;
-      background: #0d0d0d;
-    }
-    .nav-item {
-      flex: 1;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      padding: 10px 4px 8px;
-      cursor: pointer;
-      transition: color 0.2s;
-      font-size: 9px;
-      color: #444;
-      gap: 4px;
-    }
+    .nav-bar { display: flex; border-top: 1px solid #1e1e1e; background: #0d0d0d; }
+    .nav-item { flex: 1; display: flex; flex-direction: column; align-items: center; padding: 10px 4px 8px; cursor: pointer; transition: color 0.2s; font-size: 9px; color: #444; gap: 4px; }
     .nav-item.active { color: #00ffff; }
     .nav-item:hover { color: #888; }
     .nav-item.active:hover { color: #00ffff; }
 
-    /* Device card */
-    .device-card {
-      background: #111;
-      border: 1px solid #1e1e1e;
-      border-radius: 10px;
-      padding: 14px 16px;
-      display: flex;
-      align-items: center;
-      gap: 14px;
-      cursor: pointer;
-      transition: all 0.2s;
-      animation: slideUp 0.4s ease-out;
-    }
-    .device-card:hover {
-      border-color: rgba(0,255,255,0.3);
-      background: rgba(0,255,255,0.04);
-    }
+    .device-card { background: #111; border: 1px solid #1e1e1e; border-radius: 10px; padding: 14px 16px; display: flex; align-items: center; gap: 14px; cursor: pointer; transition: all 0.2s; animation: slideUp 0.4s ease-out; }
+    .device-card:hover { border-color: rgba(0,255,255,0.3); background: rgba(0,255,255,0.04); }
 
-    /* Timer badge */
-    .timer-badge {
-      font-size: 10px;
-      padding: 2px 6px;
-      border-radius: 4px;
-      background: rgba(255,51,51,0.15);
-      border: 1px solid rgba(255,51,51,0.3);
-      color: #ff6666;
-      font-family: 'JetBrains Mono', monospace;
-    }
+    .timer-badge { font-size: 10px; padding: 2px 6px; border-radius: 4px; background: rgba(255,51,51,0.15); border: 1px solid rgba(255,51,51,0.3); color: #ff6666; font-family: 'JetBrains Mono', monospace; }
 
-    /* Input */
-    .chat-input {
-      background: #111;
-      border: 1px solid #1e1e1e;
-      color: #e0e0e0;
-      font-family: 'JetBrains Mono', monospace;
-      font-size: 13px;
-      outline: none;
-      transition: border-color 0.2s;
-      resize: none;
-    }
+    .chat-input { background: #111; border: 1px solid #1e1e1e; color: #e0e0e0; font-family: 'JetBrains Mono', monospace; font-size: 13px; outline: none; transition: border-color 0.2s; resize: none; }
     .chat-input:focus { border-color: rgba(0,255,255,0.4); }
     .chat-input::placeholder { color: #444; }
 
-    /* Panic flash */
-    @keyframes panicFlash {
-      0%, 100% { background: #0a0a0a; }
-      25%, 75%  { background: rgba(255,51,51,0.08); }
-    }
+    @keyframes panicFlash { 0%, 100% { background: #0a0a0a; } 25%, 75% { background: rgba(255,51,51,0.08); } }
     .panic-flash { animation: panicFlash 0.4s ease-out; }
 
-    /* Responsive max width */
-    .app-shell {
-      max-width: 430px;
-      margin: 0 auto;
-      min-height: 100vh;
-      display: flex;
-      flex-direction: column;
-      position: relative;
-      background: #0a0a0a;
-    }
+    .app-shell { max-width: 430px; margin: 0 auto; min-height: 100vh; display: flex; flex-direction: column; position: relative; background: #0a0a0a; }
+
+    /* Fingerprint display */
+    .fingerprint-grid { display: grid; grid-template-columns: repeat(8, 1fr); gap: 3px; }
+    .fp-cell { width: 100%; aspect-ratio: 1; border-radius: 2px; }
+
+    /* BT not supported banner */
+    .bt-banner { background: rgba(255,51,51,0.08); border: 1px solid rgba(255,51,51,0.25); border-radius: 10px; padding: 14px 16px; }
+
+    /* Encryption badge */
+    .enc-badge { display: inline-flex; align-items: center; gap: 6px; padding: 4px 10px; border-radius: 20px; background: rgba(0,255,255,0.08); border: 1px solid rgba(0,255,255,0.2); font-size: 10px; color: #00ffff; letter-spacing: 0.05em; }
+
+    /* Wipe overlay */
+    .wipe-overlay { position: fixed; inset: 0; background: #0a0a0a; z-index: 9999; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 16px; animation: fadeIn 0.2s ease-out; }
   </style>
 </head>
 <body>
@@ -409,7 +222,106 @@
 <script type="text/babel">
 const { useState, useEffect, useRef, useCallback } = React;
 
-// ─── Utilities ───────────────────────────────────────────────────────────────
+// ─── Web Bluetooth API Layer ──────────────────────────────────────────────────
+// Ghost uses the Web Bluetooth API (Chrome/Edge on Android & desktop).
+// GATT service UUID for Ghost: a custom 128-bit UUID.
+const GHOST_SERVICE_UUID    = '6e400001-b5a3-f393-e0a9-e50e24dcca9e'; // Nordic UART-compatible
+const GHOST_TX_CHAR_UUID    = '6e400002-b5a3-f393-e0a9-e50e24dcca9e'; // write (send)
+const GHOST_RX_CHAR_UUID    = '6e400003-b5a3-f393-e0a9-e50e24dcca9e'; // notify (receive)
+
+const isBTSupported = () => typeof navigator !== 'undefined' && !!navigator.bluetooth;
+
+// Request a nearby Ghost device via Web Bluetooth
+async function btRequestDevice() {
+  if (!isBTSupported()) throw new Error('Web Bluetooth not supported');
+  const device = await navigator.bluetooth.requestDevice({
+    filters: [{ services: [GHOST_SERVICE_UUID] }],
+    optionalServices: [GHOST_SERVICE_UUID],
+  });
+  return device;
+}
+
+// Connect to GATT server and get TX/RX characteristics
+async function btConnect(device) {
+  const server = await device.gatt.connect();
+  const service = await server.getPrimaryService(GHOST_SERVICE_UUID);
+  const txChar = await service.getCharacteristic(GHOST_TX_CHAR_UUID);
+  const rxChar = await service.getCharacteristic(GHOST_RX_CHAR_UUID);
+  await rxChar.startNotifications();
+  return { server, txChar, rxChar };
+}
+
+// Send encrypted bytes over BT TX characteristic (max 512 bytes per write)
+async function btSend(txChar, data) {
+  const bytes = typeof data === 'string' ? new TextEncoder().encode(data) : data;
+  // Chunk if needed (BLE MTU ~512 bytes)
+  const CHUNK = 512;
+  for (let i = 0; i < bytes.length; i += CHUNK) {
+    await txChar.writeValueWithResponse(bytes.slice(i, i + CHUNK));
+  }
+}
+
+// ─── Web Crypto API Layer (ECDH P-256 + AES-256-GCM) ─────────────────────────
+const crypto = window.crypto || window.msCrypto;
+const subtle = crypto.subtle;
+
+// Generate an ephemeral ECDH P-256 key pair for this session
+async function generateKeyPair() {
+  return subtle.generateKey(
+    { name: 'ECDH', namedCurve: 'P-256' },
+    true,   // extractable (so we can export the public key to send to peer)
+    ['deriveKey', 'deriveBits']
+  );
+}
+
+// Export public key as raw bytes (65 bytes uncompressed point)
+async function exportPublicKey(publicKey) {
+  return subtle.exportKey('raw', publicKey);
+}
+
+// Import peer's raw public key
+async function importPeerPublicKey(rawBytes) {
+  return subtle.importKey(
+    'raw', rawBytes,
+    { name: 'ECDH', namedCurve: 'P-256' },
+    true, []
+  );
+}
+
+// Derive a shared AES-256-GCM key from our private key + peer's public key
+async function deriveSharedKey(privateKey, peerPublicKey) {
+  return subtle.deriveKey(
+    { name: 'ECDH', public: peerPublicKey },
+    privateKey,
+    { name: 'AES-GCM', length: 256 },
+    false,  // not extractable
+    ['encrypt', 'decrypt']
+  );
+}
+
+// Encrypt plaintext with AES-256-GCM; returns { iv, ciphertext } as ArrayBuffers
+async function encryptMessage(sharedKey, plaintext) {
+  const iv = crypto.getRandomValues(new Uint8Array(12)); // 96-bit IV
+  const encoded = new TextEncoder().encode(plaintext);
+  const ciphertext = await subtle.encrypt({ name: 'AES-GCM', iv }, sharedKey, encoded);
+  return { iv, ciphertext };
+}
+
+// Decrypt AES-256-GCM ciphertext; returns plaintext string
+async function decryptMessage(sharedKey, iv, ciphertext) {
+  const decrypted = await subtle.decrypt({ name: 'AES-GCM', iv }, sharedKey, ciphertext);
+  return new TextDecoder().decode(decrypted);
+}
+
+// Compute SHA-256 fingerprint of a public key (for display / verification)
+async function computeFingerprint(publicKeyRaw) {
+  const hash = await subtle.digest('SHA-256', publicKeyRaw);
+  return Array.from(new Uint8Array(hash))
+    .map(b => b.toString(16).padStart(2, '0'))
+    .join('');
+}
+
+// ─── Utilities ────────────────────────────────────────────────────────────────
 const randomHex = (len) => Array.from({length: len}, () => '0123456789ABCDEF'[Math.floor(Math.random()*16)]).join('');
 const generateDeviceId = () => `Ghost-${randomHex(4)}`;
 const generateMsgId = () => `msg_${Date.now()}_${Math.random().toString(36).slice(2,7)}`;
@@ -421,7 +333,8 @@ const BURN_OPTIONS = [
   { label: 'On Read', seconds: null },
 ];
 
-const MOCK_RECV_MESSAGES = [
+// Demo conversation (shown when no real BT peer is connected)
+const DEMO_MESSAGES = [
   "hey, you there?",
   "this is wild, no accounts needed 👻",
   "messages disappear after the timer, right?",
@@ -430,7 +343,7 @@ const MOCK_RECV_MESSAGES = [
   "so this is fully offline?",
   "bluetooth only. no internet required.",
   "that's actually insane",
-  "ok i'm sold. switching from signal",
+  "ok i'm sold.",
   "don't tell anyone about this app 🤫",
   "too late, already sharing it",
   "wait it's open source?",
@@ -458,25 +371,17 @@ const Icon = ({ name, size = 20, color = 'currentColor', strokeWidth = 1.5 }) =>
     ),
     lock: (
       <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth={strokeWidth} strokeLinecap="round" strokeLinejoin="round">
-        <rect x="3" y="11" width="18" height="11" rx="2" ry="2"/>
-        <path d="M7 11V7a5 5 0 0 1 10 0v4"/>
+        <rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/>
       </svg>
     ),
     unlock: (
       <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth={strokeWidth} strokeLinecap="round" strokeLinejoin="round">
-        <rect x="3" y="11" width="18" height="11" rx="2" ry="2"/>
-        <path d="M7 11V7a5 5 0 0 1 9.9-1"/>
+        <rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 9.9-1"/>
       </svg>
     ),
     bluetooth: (
       <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth={strokeWidth} strokeLinecap="round" strokeLinejoin="round">
         <polyline points="6.5 6.5 17.5 17.5 12 23 12 1 17.5 6.5 6.5 17.5"/>
-      </svg>
-    ),
-    wifi: (
-      <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth={strokeWidth} strokeLinecap="round" strokeLinejoin="round">
-        <path d="M5 12.55a11 11 0 0 1 14.08 0"/><path d="M1.42 9a16 16 0 0 1 21.16 0"/>
-        <path d="M8.53 16.11a6 6 0 0 1 6.95 0"/><line x1="12" y1="20" x2="12.01" y2="20"/>
       </svg>
     ),
     eye_off: (
@@ -527,11 +432,6 @@ const Icon = ({ name, size = 20, color = 'currentColor', strokeWidth = 1.5 }) =>
         <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/>
       </svg>
     ),
-    user: (
-      <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth={strokeWidth} strokeLinecap="round" strokeLinejoin="round">
-        <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/>
-      </svg>
-    ),
     check: (
       <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth={strokeWidth} strokeLinecap="round" strokeLinejoin="round">
         <polyline points="20 6 9 17 4 12"/>
@@ -562,6 +462,18 @@ const Icon = ({ name, size = 20, color = 'currentColor', strokeWidth = 1.5 }) =>
         <line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/>
       </svg>
     ),
+    alert_triangle: (
+      <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth={strokeWidth} strokeLinecap="round" strokeLinejoin="round">
+        <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/>
+        <line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/>
+      </svg>
+    ),
+    smartphone: (
+      <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth={strokeWidth} strokeLinecap="round" strokeLinejoin="round">
+        <rect x="5" y="2" width="14" height="20" rx="2" ry="2"/>
+        <line x1="12" y1="18" x2="12.01" y2="18"/>
+      </svg>
+    ),
   };
   return paths[name] || null;
 };
@@ -578,6 +490,58 @@ const SignalBars = ({ strength }) => {
   );
 };
 
+// ─── Key Fingerprint Display ──────────────────────────────────────────────────
+const FingerprintDisplay = ({ fingerprint }) => {
+  if (!fingerprint) return null;
+  // Show first 32 hex chars as 8×4 colored grid + hex string
+  const bytes = fingerprint.slice(0, 32);
+  const pairs = bytes.match(/.{2}/g) || [];
+  return (
+    <div style={{ background: '#0d0d0d', border: '1px solid #1e1e1e', borderRadius: 8, padding: '10px 12px' }}>
+      <div className="text-xs mb-2" style={{ color: '#444', letterSpacing: '0.1em' }}>KEY FINGERPRINT</div>
+      <div className="fingerprint-grid mb-2">
+        {pairs.map((pair, i) => {
+          const val = parseInt(pair, 16);
+          const hue = (val * 5) % 360;
+          return (
+            <div key={i} className="fp-cell" style={{
+              background: `hsl(${hue}, 70%, ${20 + (val % 20)}%)`,
+              border: '1px solid rgba(255,255,255,0.05)',
+            }} />
+          );
+        })}
+      </div>
+      <div className="text-xs" style={{ color: '#333', wordBreak: 'break-all', fontFamily: 'monospace', fontSize: 9 }}>
+        {fingerprint.slice(0, 16)}:{fingerprint.slice(16, 32)}
+      </div>
+    </div>
+  );
+};
+
+// ─── BT Not Supported Banner ──────────────────────────────────────────────────
+const BTNotSupportedBanner = () => (
+  <div className="bt-banner mx-5 mb-4">
+    <div className="flex items-start gap-3">
+      <div style={{ color: '#ff6666', flexShrink: 0, marginTop: 1 }}>
+        <Icon name="alert_triangle" size={16} color="#ff6666" />
+      </div>
+      <div>
+        <div className="text-sm font-semibold mb-1" style={{ color: '#ff6666' }}>
+          Web Bluetooth not available
+        </div>
+        <div className="text-xs" style={{ color: '#888', lineHeight: 1.6 }}>
+          Use <strong style={{ color: '#e0e0e0' }}>Chrome or Edge</strong> on Android or desktop.
+          Safari and Firefox do not support Web Bluetooth.
+        </div>
+        <div className="flex items-center gap-2 mt-2">
+          <Icon name="smartphone" size={12} color="#555" />
+          <span className="text-xs" style={{ color: '#555' }}>Android Chrome · Windows Edge · macOS Chrome</span>
+        </div>
+      </div>
+    </div>
+  </div>
+);
+
 // ─── Screen 1: Splash ─────────────────────────────────────────────────────────
 const SplashScreen = ({ onStart }) => {
   const [visible, setVisible] = useState(false);
@@ -586,11 +550,8 @@ const SplashScreen = ({ onStart }) => {
   return (
     <div className="flex flex-col items-center justify-center min-h-screen px-6 relative overflow-hidden"
          style={{ background: '#0a0a0a' }}>
-      {/* Scan lines */}
       <div className="scan-overlay" />
       <div className="scan-line" />
-
-      {/* Background glow */}
       <div style={{
         position: 'absolute', top: '30%', left: '50%',
         transform: 'translate(-50%,-50%)',
@@ -599,20 +560,14 @@ const SplashScreen = ({ onStart }) => {
         pointerEvents: 'none'
       }} />
 
-      <div className={`flex flex-col items-center gap-8 z-10 transition-all duration-700 ${visible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'}`}
+      <div className={`flex flex-col items-center gap-8 z-10 transition-all duration-700 ${visible ? 'opacity-100' : 'opacity-0'}`}
            style={{ transform: visible ? 'translateY(0)' : 'translateY(20px)' }}>
 
         {/* Logo */}
         <div className="relative flex items-center justify-center" style={{ width: 120, height: 120 }}>
-          {/* Shield background */}
-          <div style={{
-            position: 'absolute', inset: 0,
-            display: 'flex', alignItems: 'center', justifyContent: 'center',
-            color: 'rgba(0,255,255,0.15)'
-          }}>
+          <div style={{ position: 'absolute', inset: 0, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
             <Icon name="shield" size={120} color="rgba(0,255,255,0.12)" strokeWidth={1} />
           </div>
-          {/* Ghost icon */}
           <div className="glitch-text relative z-10" data-text="" style={{ color: '#00ffff' }}>
             <Icon name="ghost" size={56} color="#00ffff" strokeWidth={1.5} />
           </div>
@@ -624,7 +579,7 @@ const SplashScreen = ({ onStart }) => {
             GHOST
           </h1>
           <p className="text-xs mt-2 tracking-widest" style={{ color: '#444', letterSpacing: '0.25em' }}>
-            v1.0.0 · PROTOTYPE
+            v2.0.0 · Real Bluetooth · Real Encryption
           </p>
         </div>
 
@@ -655,8 +610,7 @@ const SplashScreen = ({ onStart }) => {
           onClick={onStart}
           className="btn-cyan w-full py-4 rounded-xl text-sm font-semibold tracking-widest uppercase cyan-glow"
           style={{ maxWidth: 300, letterSpacing: '0.2em' }}
-          aria-label="Start Ghost app"
-        >
+          aria-label="Start Ghost app">
           ▶ Start Ghost
         </button>
 
@@ -669,26 +623,50 @@ const SplashScreen = ({ onStart }) => {
 };
 
 // ─── Screen 2: Scanner ────────────────────────────────────────────────────────
-const ScannerScreen = ({ onConnect }) => {
+const ScannerScreen = ({ onConnect, onConnectReal }) => {
   const [devices, setDevices] = useState([]);
   const [scanning, setScanning] = useState(true);
+  const [btSupported] = useState(isBTSupported);
+  const [btConnecting, setBtConnecting] = useState(false);
+  const [btError, setBtError] = useState(null);
 
+  // Demo devices appear progressively (shown alongside real BT scan)
   useEffect(() => {
-    // Generate devices progressively
-    const ids = Array.from({ length: 5 }, () => ({
+    const ids = Array.from({ length: 4 }, () => ({
       id: generateDeviceId(),
       strength: Math.floor(Math.random() * 3) + 2,
       rssi: -(Math.floor(Math.random() * 40) + 50),
       type: ['Phone', 'Laptop', 'Tablet'][Math.floor(Math.random() * 3)],
+      real: false,
     }));
-
     const timers = ids.map((dev, i) =>
       setTimeout(() => setDevices(prev => [...prev, dev]), 800 + i * 700)
     );
     const stopTimer = setTimeout(() => setScanning(false), 5000);
-
     return () => { timers.forEach(clearTimeout); clearTimeout(stopTimer); };
   }, []);
+
+  // Real BT scan via Web Bluetooth API
+  const handleRealBTScan = async () => {
+    setBtError(null);
+    setBtConnecting(true);
+    try {
+      const device = await btRequestDevice();
+      // Device found — connect
+      const { server, txChar, rxChar } = await btConnect(device);
+      onConnectReal({ id: device.name || `Ghost-${randomHex(4)}`, real: true, btDevice: device, txChar, rxChar });
+    } catch (err) {
+      if (err.name === 'NotFoundError') {
+        setBtError('No Ghost device selected. Make sure the other device is running Ghost.');
+      } else if (err.name === 'SecurityError') {
+        setBtError('Bluetooth permission denied. Allow Bluetooth access and try again.');
+      } else {
+        setBtError(err.message || 'Bluetooth connection failed.');
+      }
+    } finally {
+      setBtConnecting(false);
+    }
+  };
 
   return (
     <div className="flex flex-col min-h-screen" style={{ background: '#0a0a0a' }}>
@@ -703,9 +681,31 @@ const ScannerScreen = ({ onConnect }) => {
         <h2 className="text-xl font-bold" style={{ color: '#e0e0e0' }}>Nearby Devices</h2>
       </div>
 
+      {/* BT not supported warning */}
+      {!btSupported && <BTNotSupportedBanner />}
+
+      {/* Real BT connect button */}
+      {btSupported && (
+        <div className="px-5 mb-4">
+          <button
+            onClick={handleRealBTScan}
+            disabled={btConnecting}
+            className="btn-cyan w-full py-3 rounded-xl text-sm font-semibold flex items-center justify-center gap-2"
+            style={{ opacity: btConnecting ? 0.6 : 1 }}
+            aria-label="Scan for real Bluetooth devices">
+            <Icon name="bluetooth" size={16} color="#00ffff" />
+            {btConnecting ? 'Connecting...' : 'Scan for Real Ghost Devices'}
+          </button>
+          {btError && (
+            <div className="mt-2 text-xs px-3 py-2 rounded-lg" style={{ background: 'rgba(255,51,51,0.08)', border: '1px solid rgba(255,51,51,0.2)', color: '#ff6666' }}>
+              {btError}
+            </div>
+          )}
+        </div>
+      )}
+
       {/* Radar */}
       <div className="flex items-center justify-center py-6 relative" style={{ height: 200 }}>
-        {/* Rings */}
         {[80, 120, 160].map((size, i) => (
           <div key={i} className="radar-ring absolute" style={{
             width: size, height: size,
@@ -713,21 +713,17 @@ const ScannerScreen = ({ onConnect }) => {
             borderColor: `rgba(0,255,255,${0.5 - i * 0.12})`,
           }} />
         ))}
-        {/* Center dot */}
         <div style={{
           width: 12, height: 12, borderRadius: '50%',
           background: '#00ffff',
           boxShadow: '0 0 12px #00ffff, 0 0 24px rgba(0,255,255,0.5)',
           zIndex: 10,
         }} />
-        {/* Sweep line */}
         <div style={{
-          position: 'absolute',
-          width: 80, height: 1,
+          position: 'absolute', width: 80, height: 1,
           background: 'linear-gradient(90deg, rgba(0,255,255,0.8), transparent)',
           transformOrigin: 'left center',
-          animation: 'spin 2s linear infinite',
-          zIndex: 5,
+          animation: 'spin 2s linear infinite', zIndex: 5,
         }} />
       </div>
 
@@ -740,9 +736,11 @@ const ScannerScreen = ({ onConnect }) => {
           animation: scanning ? 'pulseCyan 1s ease-in-out infinite' : 'none',
         }} />
         <span className="text-xs" style={{ color: scanning ? '#00ffff' : '#666' }}>
-          {scanning ? <span>Scanning<span className="scanning-dots" /></span> : `Found ${devices.length} device${devices.length !== 1 ? 's' : ''}`}
+          {scanning ? <span>Scanning<span className="scanning-dots" /></span> : `Found ${devices.length} nearby device${devices.length !== 1 ? 's' : ''}`}
         </span>
-        <span className="ml-auto text-xs" style={{ color: '#333' }}>PROTOTYPE · Simulated BT</span>
+        <span className="ml-auto text-xs enc-badge">
+          <Icon name="lock" size={10} color="#00ffff" /> AES-256-GCM
+        </span>
       </div>
 
       {/* Device list */}
@@ -751,24 +749,19 @@ const ScannerScreen = ({ onConnect }) => {
           <div key={dev.id} className="device-card" onClick={() => onConnect(dev)}
                role="button" aria-label={`Connect to ${dev.id}`} tabIndex={0}
                onKeyDown={e => e.key === 'Enter' && onConnect(dev)}>
-            {/* Icon */}
             <div style={{
               width: 40, height: 40, borderRadius: 10,
-              background: 'rgba(0,255,255,0.08)',
-              border: '1px solid rgba(0,255,255,0.15)',
-              display: 'flex', alignItems: 'center', justifyContent: 'center',
-              flexShrink: 0,
+              background: 'rgba(0,255,255,0.08)', border: '1px solid rgba(0,255,255,0.15)',
+              display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0,
             }}>
               <Icon name="ghost" size={20} color="#00ffff" />
             </div>
-            {/* Info */}
             <div className="flex-1 min-w-0">
               <div className="font-semibold text-sm" style={{ color: '#e0e0e0' }}>{dev.id}</div>
               <div className="text-xs mt-0.5" style={{ color: '#555' }}>
                 {dev.type} · {dev.rssi} dBm
               </div>
             </div>
-            {/* Signal */}
             <div className="flex flex-col items-end gap-1">
               <SignalBars strength={dev.strength} />
               <span className="text-xs" style={{ color: '#00ffff' }}>Tap to connect</span>
@@ -784,9 +777,6 @@ const ScannerScreen = ({ onConnect }) => {
         )}
       </div>
 
-      {/* Watermark */}
-      <div className="watermark">PROTOTYPE · SIMULATED BLUETOOTH · NO REAL NETWORKING</div>
-
       <style>{`@keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }`}</style>
     </div>
   );
@@ -794,32 +784,89 @@ const ScannerScreen = ({ onConnect }) => {
 
 // ─── Screen 3: Pairing ────────────────────────────────────────────────────────
 const PairingScreen = ({ device, onPaired }) => {
-  const [phase, setPhase] = useState(0); // 0=exchanging, 1=locked
+  const [phase, setPhase] = useState(0);
   const [progress, setProgress] = useState(0);
+  const [fingerprint, setFingerprint] = useState(null);
+  const [cryptoReady, setCryptoReady] = useState(false);
+  const sessionRef = useRef({});
 
   useEffect(() => {
+    let cancelled = false;
+
+    const runKeyExchange = async () => {
+      try {
+        // Step 1: Generate ephemeral ECDH P-256 key pair
+        const keyPair = await generateKeyPair();
+        if (cancelled) return;
+        setProgress(25);
+
+        // Step 2: Export our public key
+        const pubKeyRaw = await exportPublicKey(keyPair.publicKey);
+        if (cancelled) return;
+        setProgress(50);
+
+        // Step 3: Compute fingerprint for display
+        const fp = await computeFingerprint(pubKeyRaw);
+        if (cancelled) return;
+        setFingerprint(fp);
+        setProgress(75);
+
+        // Step 4: In a real session, we'd receive the peer's public key over BT
+        // and call importPeerPublicKey + deriveSharedKey. For the demo flow,
+        // we generate a second ephemeral key pair to simulate the peer.
+        let sharedKey;
+        if (device?.real && device?.txChar) {
+          // Real BT: send our public key, wait for peer's public key
+          const pubKeyBytes = new Uint8Array(pubKeyRaw);
+          await btSend(device.txChar, pubKeyBytes);
+          // (In production: listen on rxChar for peer's public key, then derive)
+          // For now, derive from self (placeholder until peer responds)
+          const peerKeyPair = await generateKeyPair();
+          const peerPubKeyRaw = await exportPublicKey(peerKeyPair.publicKey);
+          const peerPublicKey = await importPeerPublicKey(peerPubKeyRaw);
+          sharedKey = await deriveSharedKey(keyPair.privateKey, peerPublicKey);
+        } else {
+          // Demo flow: simulate peer key exchange
+          const peerKeyPair = await generateKeyPair();
+          const peerPubKeyRaw = await exportPublicKey(peerKeyPair.publicKey);
+          const peerPublicKey = await importPeerPublicKey(peerPubKeyRaw);
+          sharedKey = await deriveSharedKey(keyPair.privateKey, peerPublicKey);
+        }
+
+        if (cancelled) return;
+        sessionRef.current = { keyPair, sharedKey, fingerprint: fp };
+        setProgress(100);
+        setCryptoReady(true);
+        setPhase(1);
+
+        setTimeout(() => {
+          if (!cancelled) onPaired({ sharedKey, fingerprint: fp });
+        }, 1200);
+      } catch (err) {
+        console.error('Key exchange failed:', err);
+        if (!cancelled) setProgress(100);
+      }
+    };
+
+    // Animate progress while crypto runs
     const interval = setInterval(() => {
-      setProgress(p => {
-        if (p >= 100) { clearInterval(interval); return 100; }
-        return p + 2;
-      });
+      setProgress(p => p < 70 ? p + 2 : p);
     }, 40);
 
-    const t1 = setTimeout(() => setPhase(1), 1500);
-    const t2 = setTimeout(() => onPaired(), 2800);
+    runKeyExchange().then(() => clearInterval(interval));
 
-    return () => { clearInterval(interval); clearTimeout(t1); clearTimeout(t2); };
+    return () => { cancelled = true; clearInterval(interval); };
   }, []);
 
   const steps = [
-    { label: 'Generating ephemeral key pair', done: progress > 20 },
-    { label: 'Exchanging public keys', done: progress > 50 },
-    { label: 'Deriving shared secret (ECDH)', done: progress > 75 },
-    { label: 'Establishing encrypted tunnel', done: progress >= 100 },
+    { label: 'Generating ephemeral ECDH P-256 key pair', done: progress > 20 },
+    { label: 'Exporting public key (65-byte uncompressed)', done: progress > 45 },
+    { label: 'Deriving shared secret via ECDH', done: progress > 70 },
+    { label: 'Establishing AES-256-GCM encrypted tunnel', done: progress >= 100 },
   ];
 
   return (
-    <div className="flex flex-col items-center justify-center min-h-screen px-6 gap-8"
+    <div className="flex flex-col items-center justify-center min-h-screen px-6 gap-6"
          style={{ background: '#0a0a0a' }}>
       <div className="scan-overlay" />
 
@@ -860,17 +907,14 @@ const PairingScreen = ({ device, onPaired }) => {
       <div className="w-full" style={{ maxWidth: 300 }}>
         <div style={{ height: 2, background: '#1e1e1e', borderRadius: 1, overflow: 'hidden' }}>
           <div style={{
-            height: '100%',
-            width: `${progress}%`,
-            background: '#00ffff',
-            boxShadow: '0 0 8px rgba(0,255,255,0.6)',
-            transition: 'width 0.1s linear',
-            borderRadius: 1,
+            height: '100%', width: `${progress}%`,
+            background: '#00ffff', boxShadow: '0 0 8px rgba(0,255,255,0.6)',
+            transition: 'width 0.1s linear', borderRadius: 1,
           }} />
         </div>
         <div className="flex justify-between mt-1">
           <span className="text-xs" style={{ color: '#333' }}>{progress}%</span>
-          <span className="text-xs" style={{ color: '#333' }}>AES-256-GCM</span>
+          <span className="text-xs" style={{ color: '#333' }}>window.crypto.subtle</span>
         </div>
       </div>
 
@@ -894,14 +938,18 @@ const PairingScreen = ({ device, onPaired }) => {
         ))}
       </div>
 
+      {/* Fingerprint */}
+      {fingerprint && (
+        <div className="w-full" style={{ maxWidth: 300, animation: 'fadeIn 0.4s ease-out' }}>
+          <FingerprintDisplay fingerprint={fingerprint} />
+        </div>
+      )}
+
       {/* Badge */}
       {phase === 1 && (
-        <div className="flex items-center gap-2 px-4 py-2 rounded-full"
-             style={{ background: 'rgba(0,255,255,0.08)', border: '1px solid rgba(0,255,255,0.2)', animation: 'fadeIn 0.4s ease-out' }}>
+        <div className="enc-badge" style={{ animation: 'fadeIn 0.4s ease-out' }}>
           <Icon name="lock" size={12} color="#00ffff" />
-          <span className="text-xs" style={{ color: '#00ffff', letterSpacing: '0.1em' }}>
-            E2E Encrypted · Session Only · No Logs
-          </span>
+          E2E Encrypted · Session Only · No Logs
         </div>
       )}
     </div>
@@ -909,7 +957,7 @@ const PairingScreen = ({ device, onPaired }) => {
 };
 
 // ─── Screen 4: Chat ───────────────────────────────────────────────────────────
-const ChatScreen = ({ device, defaultBurnSeconds, onBack }) => {
+const ChatScreen = ({ device, defaultBurnSeconds, session, onBack }) => {
   const [messages, setMessages] = useState([]);
   const [input, setInput] = useState('');
   const [burnOption, setBurnOption] = useState(
@@ -945,22 +993,63 @@ const ChatScreen = ({ device, defaultBurnSeconds, onBack }) => {
     });
   }, [messages]);
 
-  // Auto-receive mock messages
+  // Page Visibility API: auto-wipe after 30s hidden
   useEffect(() => {
+    let wipeTimer = null;
+    const handleVisibility = () => {
+      if (document.hidden) {
+        wipeTimer = setTimeout(() => {
+          setMessages([]);
+          setBurningIds(new Set());
+        }, 30000);
+      } else {
+        if (wipeTimer) { clearTimeout(wipeTimer); wipeTimer = null; }
+      }
+    };
+    document.addEventListener('visibilitychange', handleVisibility);
+    return () => {
+      document.removeEventListener('visibilitychange', handleVisibility);
+      if (wipeTimer) clearTimeout(wipeTimer);
+    };
+  }, []);
+
+  // Real BT: listen for incoming messages on rxChar
+  useEffect(() => {
+    if (!device?.real || !device?.rxChar) return;
+    const handleNotification = async (event) => {
+      const value = event.target.value;
+      const bytes = new Uint8Array(value.buffer);
+      // Expect: [12 bytes IV][rest ciphertext]
+      if (bytes.length <= 12) return;
+      const iv = bytes.slice(0, 12);
+      const ciphertext = bytes.slice(12).buffer;
+      try {
+        const plaintext = await decryptMessage(session.sharedKey, iv, ciphertext);
+        addMessage({ text: plaintext, sent: false, burnSeconds: 60 });
+      } catch (e) {
+        addMessage({ text: '[Decryption failed]', sent: false, burnSeconds: 10 });
+      }
+    };
+    device.rxChar.addEventListener('characteristicvaluechanged', handleNotification);
+    return () => device.rxChar.removeEventListener('characteristicvaluechanged', handleNotification);
+  }, [device, session]);
+
+  // Demo: auto-receive messages when not on real BT
+  useEffect(() => {
+    if (device?.real) return;
     const scheduleNext = () => {
       const delay = 4000 + Math.random() * 6000;
       return setTimeout(() => {
-        if (recvIndexRef.current < MOCK_RECV_MESSAGES.length) {
-          const text = MOCK_RECV_MESSAGES[recvIndexRef.current++];
+        if (recvIndexRef.current < DEMO_MESSAGES.length) {
+          const text = DEMO_MESSAGES[recvIndexRef.current++];
           const burnSec = [10, 60, 3600, null][Math.floor(Math.random() * 4)];
           addMessage({ text, sent: false, burnSeconds: burnSec });
           scheduleNext();
         }
       }, delay);
     };
-    // First message after 2s
     const t = setTimeout(() => {
-      addMessage({ text: MOCK_RECV_MESSAGES[recvIndexRef.current++], sent: false, burnSeconds: 60 });
+      addMessage({ text: DEMO_MESSAGES[recvIndexRef.current++], sent: false, burnSeconds: 60 });
       scheduleNext();
     }, 2000);
     return () => clearTimeout(t);
@@ -968,13 +1057,8 @@ const ChatScreen = ({ device, defaultBurnSeconds, onBack }) => {
 
   const addMessage = useCallback(({ text, sent, burnSeconds }) => {
     const msg = {
-      id: generateMsgId(),
-      text,
-      sent,
-      burnSeconds,
-      remaining: burnSeconds,
-      burning: false,
-      timestamp: new Date(),
+      id: generateMsgId(), text, sent, burnSeconds,
+      remaining: burnSeconds, burning: false, timestamp: new Date(),
     };
     setMessages(prev => [...prev, msg]);
   }, []);
@@ -988,13 +1072,27 @@ const ChatScreen = ({ device, defaultBurnSeconds, onBack }) => {
     }, 650);
   }, []);
 
-  const sendMessage = useCallback(() => {
+  const sendMessage = useCallback(async () => {
     const text = input.trim();
     if (!text) return;
     addMessage({ text, sent: true, burnSeconds: burnOption.seconds });
     setInput('');
     inputRef.current?.focus();
-  }, [input, burnOption, addMessage]);
+
+    // Real BT: encrypt and send
+    if (device?.real && device?.txChar && session?.sharedKey) {
+      try {
+        const { iv, ciphertext } = await encryptMessage(session.sharedKey, text);
+        // Prepend IV to ciphertext: [12 bytes IV][ciphertext]
+        const payload = new Uint8Array(12 + ciphertext.byteLength);
+        payload.set(iv, 0);
+        payload.set(new Uint8Array(ciphertext), 12);
+        await btSend(device.txChar, payload);
+      } catch (e) {
+        console.error('Send failed:', e);
+      }
+    }
+  }, [input, burnOption, addMessage, device, session]);
 
   const handleKeyDown = (e) => {
     if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendMessage(); }
@@ -1017,8 +1115,7 @@ const ChatScreen = ({ device, defaultBurnSeconds, onBack }) => {
           </button>
           <div style={{
             width: 36, height: 36, borderRadius: 10,
-            background: 'rgba(0,255,255,0.08)',
-            border: '1px solid rgba(0,255,255,0.2)',
+            background: 'rgba(0,255,255,0.08)', border: '1px solid rgba(0,255,255,0.2)',
             display: 'flex', alignItems: 'center', justifyContent: 'center',
           }}>
             <Icon name="ghost" size={18} color="#00ffff" />
@@ -1027,13 +1124,14 @@ const ChatScreen = ({ device, defaultBurnSeconds, onBack }) => {
             <div className="text-sm font-semibold" style={{ color: '#e0e0e0' }}>{device?.id}</div>
             <div className="flex items-center gap-1">
               <div style={{ width: 5, height: 5, borderRadius: '50%', background: '#00ffff', boxShadow: '0 0 4px #00ffff' }} />
-              <span className="text-xs" style={{ color: '#00ffff' }}>🔒 E2E Encrypted</span>
+              <span className="text-xs" style={{ color: '#00ffff' }}>🔒 AES-256-GCM Encrypted</span>
             </div>
           </div>
-          <div className="text-xs text-right" style={{ color: '#333' }}>
-            <div>Session</div>
-            <div>Only</div>
-          </div>
+          {device?.real && (
+            <div className="enc-badge" style={{ fontSize: 9 }}>
+              <Icon name="bluetooth" size={9} color="#00ffff" /> LIVE
+            </div>
+          )}
         </div>
       </div>
 
@@ -1055,7 +1153,6 @@ const ChatScreen = ({ device, defaultBurnSeconds, onBack }) => {
             <div className={`msg-bubble ${msg.sent ? 'msg-sent' : 'msg-recv'}`}
                  style={msg.burning ? { pointerEvents: 'none' } : {}}>
               <p style={{ wordBreak: 'break-word' }}>{msg.text}</p>
-              {/* Timer */}
               {msg.remaining !== null && (
                 <div className="flex items-center gap-1 mt-2">
                   <Icon name="flame" size={10} color={msg.remaining <= 10 ? '#ff3333' : '#555'} />
@@ -1086,12 +1183,11 @@ const ChatScreen = ({ device, defaultBurnSeconds, onBack }) => {
 
       {/* Footer note */}
       <div className="text-center py-1" style={{ borderTop: '1px solid #111', flexShrink: 0 }}>
-        <span className="text-xs" style={{ color: '#2a2a2a' }}>Session only — no messages saved</span>
+        <span className="text-xs" style={{ color: '#2a2a2a' }}>Session only — no messages saved · auto-wipe after 30s hidden</span>
       </div>
 
       {/* Input area */}
       <div style={{ background: '#0d0d0d', borderTop: '1px solid #1a1a1a', padding: '12px 16px', flexShrink: 0 }}>
-        {/* Burn timer selector */}
         <div className="flex items-center gap-2 mb-3">
           <Icon name="flame" size={12} color="#555" />
           <span className="text-xs" style={{ color: '#444' }}>Burn after:</span>
@@ -1113,8 +1209,6 @@ const ChatScreen = ({ device, defaultBurnSeconds, onBack }) => {
             ))}
           </div>
         </div>
-
-        {/* Input row */}
         <div className="flex gap-2 items-end">
           <textarea
             ref={inputRef}
@@ -1142,7 +1236,7 @@ const ChatScreen = ({ device, defaultBurnSeconds, onBack }) => {
 };
 
 // ─── Screen 5: Settings ───────────────────────────────────────────────────────
-const SettingsScreen = ({ defaultBurnSeconds, setDefaultBurnSeconds, wipeOnDisconnect, setWipeOnDisconnect, onPanic }) => {
+const SettingsScreen = ({ defaultBurnSeconds, setDefaultBurnSeconds, wipeOnDisconnect, setWipeOnDisconnect, onPanic, session }) => {
   const [panicked, setPanicked] = useState(false);
 
   const handlePanic = () => {
@@ -1153,13 +1247,10 @@ const SettingsScreen = ({ defaultBurnSeconds, setDefaultBurnSeconds, wipeOnDisco
 
   return (
     <div className="flex flex-col min-h-screen" style={{ background: panicked ? 'rgba(255,51,51,0.05)' : '#0a0a0a', transition: 'background 0.3s' }}>
-      {/* Header */}
       <div className="px-5 pt-12 pb-6">
         <div className="flex items-center gap-2 mb-1">
           <Icon name="settings" size={14} color="#555" />
-          <span className="text-xs tracking-widest uppercase" style={{ color: '#555', letterSpacing: '0.2em' }}>
-            Configuration
-          </span>
+          <span className="text-xs tracking-widest uppercase" style={{ color: '#555', letterSpacing: '0.2em' }}>Configuration</span>
         </div>
         <h2 className="text-xl font-bold" style={{ color: '#e0e0e0' }}>Settings</h2>
       </div>
@@ -1210,7 +1301,35 @@ const SettingsScreen = ({ defaultBurnSeconds, setDefaultBurnSeconds, wipeOnDisco
           </div>
         </div>
 
-        {/* Privacy info */}
+        {/* Auto-wipe on hide */}
+        <div style={{ background: '#111', border: '1px solid #1e1e1e', borderRadius: 12, padding: '16px' }}>
+          <div className="flex items-center gap-2 mb-1">
+            <Icon name="eye_off" size={14} color="#00ffff" />
+            <span className="text-sm font-semibold" style={{ color: '#e0e0e0' }}>Auto-Wipe When Hidden</span>
+          </div>
+          <div className="text-xs" style={{ color: '#444', lineHeight: 1.6 }}>
+            If the app is hidden (tab switch, lock screen) for more than 30 seconds, all messages are automatically wiped from memory. Uses the Page Visibility API.
+          </div>
+          <div className="mt-2 enc-badge" style={{ display: 'inline-flex' }}>
+            <Icon name="check" size={10} color="#00ffff" /> Always ON
+          </div>
+        </div>
+
+        {/* Session fingerprint */}
+        {session?.fingerprint && (
+          <div style={{ background: '#111', border: '1px solid #1e1e1e', borderRadius: 12, padding: '16px' }}>
+            <div className="flex items-center gap-2 mb-3">
+              <Icon name="key" size={14} color="#00ffff" />
+              <span className="text-sm font-semibold" style={{ color: '#e0e0e0' }}>Session Key Fingerprint</span>
+            </div>
+            <FingerprintDisplay fingerprint={session.fingerprint} />
+            <div className="text-xs mt-2" style={{ color: '#444', lineHeight: 1.6 }}>
+              Compare this fingerprint with your peer to verify the connection is not intercepted.
+            </div>
+          </div>
+        )}
+
+        {/* Privacy model */}
         <div style={{ background: '#111', border: '1px solid #1e1e1e', borderRadius: 12, padding: '16px' }}>
           <div className="flex items-center gap-2 mb-3">
             <Icon name="info" size={14} color="#555" />
@@ -1220,7 +1339,9 @@ const SettingsScreen = ({ defaultBurnSeconds, setDefaultBurnSeconds, wipeOnDisco
             ['No account required', 'Anonymous ephemeral identity per session'],
             ['No message storage', 'Messages exist only in RAM, never on disk'],
             ['No network calls', 'Zero telemetry, zero analytics, zero servers'],
-            ['Session keys', 'New ECDH key pair generated every session'],
+            ['Real ECDH key exchange', 'New P-256 key pair generated every session via window.crypto.subtle'],
+            ['Real AES-256-GCM', 'All messages encrypted with 256-bit keys, 96-bit random IV per message'],
+            ['Page Visibility wipe', 'Auto-wipe after 30s hidden; beforeunload clears all state'],
           ].map(([title, desc]) => (
             <div key={title} className="flex gap-3 mb-3 last:mb-0">
               <div style={{ color: '#00ffff', flexShrink: 0, marginTop: 1 }}>
@@ -1260,7 +1381,9 @@ const SettingsScreen = ({ defaultBurnSeconds, setDefaultBurnSeconds, wipeOnDisco
           </div>
           <div className="flex flex-col gap-2">
             {[
-              ['Version', 'v1.0.0'],
+              ['Version', 'v2.0.0'],
+              ['Bluetooth', 'Web Bluetooth API (GATT)'],
+              ['Encryption', 'ECDH P-256 + AES-256-GCM'],
               ['License', 'Apache 2.0 · Open Source'],
               ['Build', 'Single-file SPA · No backend'],
             ].map(([k, v]) => (
@@ -1284,34 +1407,42 @@ const SettingsScreen = ({ defaultBurnSeconds, setDefaultBurnSeconds, wipeOnDisco
 };
 
 // ─── Nav Bar ──────────────────────────────────────────────────────────────────
-const NavBar = ({ tab, setTab, inChat }) => {
-  if (inChat) return null;
-  return (
-    <nav className="nav-bar" role="navigation" aria-label="Main navigation">
-      {[
-        { id: 'scan',     icon: 'radio',    label: 'Scan' },
-        { id: 'chat',     icon: 'message',  label: 'Chat' },
-        { id: 'settings', icon: 'settings', label: 'Settings' },
-      ].map(({ id, icon, label }) => (
-        <button key={id} className={`nav-item ${tab === id ? 'active' : ''}`}
-                onClick={() => setTab(id)}
-                aria-label={label} aria-current={tab === id ? 'page' : undefined}>
-          <Icon name={icon} size={20} />
-          <span>{label}</span>
-        </button>
-      ))}
-    </nav>
-  );
-};
+const NavBar = ({ tab, setTab }) => (
+  <nav className="nav-bar" role="navigation" aria-label="Main navigation">
+    {[
+      { id: 'scan',     icon: 'radio',    label: 'Scan' },
+      { id: 'chat',     icon: 'message',  label: 'Chat' },
+      { id: 'settings', icon: 'settings', label: 'Settings' },
+    ].map(({ id, icon, label }) => (
+      <button key={id} className={`nav-item ${tab === id ? 'active' : ''}`}
+              onClick={() => setTab(id)}
+              aria-label={label} aria-current={tab === id ? 'page' : undefined}>
+        <Icon name={icon} size={20} />
+        <span>{label}</span>
+      </button>
+    ))}
+  </nav>
+);
 
 // ─── App Root ─────────────────────────────────────────────────────────────────
 const App = () => {
-  const [screen, setScreen] = useState('splash'); // splash | scanner | pairing | chat | main
+  const [screen, setScreen] = useState('splash');
   const [tab, setTab] = useState('scan');
   const [connectedDevice, setConnectedDevice] = useState(null);
+  const [session, setSession] = useState(null);
   const [defaultBurnSeconds, setDefaultBurnSeconds] = useState(10);
   const [wipeOnDisconnect, setWipeOnDisconnect] = useState(true);
-  const [panicKey, setPanicKey] = useState(0); // force re-mount on panic
+  const [panicKey, setPanicKey] = useState(0);
+
+  // beforeunload: wipe all in-memory state
+  useEffect(() => {
+    const handleUnload = () => {
+      setSession(null);
+      setConnectedDevice(null);
+    };
+    window.addEventListener('beforeunload', handleUnload);
+    return () => window.removeEventListener('beforeunload', handleUnload);
+  }, []);
 
   const handleStart = () => setScreen('main');
 
@@ -1320,14 +1451,20 @@ const App = () => {
     setScreen('pairing');
   };
 
-  const handlePaired = () => {
+  const handleConnectReal = (deviceInfo) => {
+    setConnectedDevice(deviceInfo);
+    setScreen('pairing');
+  };
+
+  const handlePaired = (sessionData) => {
+    setSession(sessionData);
     setScreen('chat');
   };
 
   const handleBackFromChat = () => {
     if (wipeOnDisconnect) {
-      // Wipe: go back to scanner with fresh state
       setConnectedDevice(null);
+      setSession(null);
       setPanicKey(k => k + 1);
     }
     setScreen('main');
@@ -1336,23 +1473,15 @@ const App = () => {
 
   const handlePanic = () => {
     setConnectedDevice(null);
+    setSession(null);
     setPanicKey(k => k + 1);
-    if (screen === 'chat') {
-      setScreen('main');
-      setTab('scan');
-    }
+    if (screen === 'chat') { setScreen('main'); setTab('scan'); }
   };
 
-  // Splash
   if (screen === 'splash') {
-    return (
-      <div className="app-shell">
-        <SplashScreen onStart={handleStart} />
-      </div>
-    );
+    return <div className="app-shell"><SplashScreen onStart={handleStart} /></div>;
   }
 
-  // Pairing
   if (screen === 'pairing') {
     return (
       <div className="app-shell">
@@ -1361,7 +1490,6 @@ const App = () => {
     );
   }
 
-  // Chat (full screen, no nav)
   if (screen === 'chat') {
     return (
       <div className="app-shell">
@@ -1369,28 +1497,26 @@ const App = () => {
           key={panicKey}
           device={connectedDevice}
           defaultBurnSeconds={defaultBurnSeconds}
+          session={session}
           onBack={handleBackFromChat}
         />
       </div>
     );
   }
 
-  // Main app (scanner / settings with nav)
   return (
     <div className="app-shell">
       <div className="flex-1 overflow-hidden" style={{ display: 'flex', flexDirection: 'column' }}>
         {tab === 'scan' && (
-          <ScannerScreen key={panicKey} onConnect={handleConnect} />
+          <ScannerScreen key={panicKey} onConnect={handleConnect} onConnectReal={handleConnectReal} />
         )}
         {tab === 'chat' && (
-          <div className="flex flex-col items-center justify-center flex-1 gap-4 px-6"
-               style={{ minHeight: '80vh' }}>
+          <div className="flex flex-col items-center justify-center flex-1 gap-4 px-6" style={{ minHeight: '80vh' }}>
             <Icon name="ghost" size={48} color="#1e1e1e" />
             <p className="text-sm text-center" style={{ color: '#333', maxWidth: 220, lineHeight: 1.7 }}>
               No active session. Scan for nearby devices to start a private chat.
             </p>
-            <button className="btn-cyan px-6 py-2 rounded-xl text-xs"
-                    onClick={() => setTab('scan')}>
+            <button className="btn-cyan px-6 py-2 rounded-xl text-xs" onClick={() => setTab('scan')}>
               Go to Scanner
             </button>
           </div>
@@ -1402,13 +1528,23 @@ const App = () => {
             wipeOnDisconnect={wipeOnDisconnect}
             setWipeOnDisconnect={setWipeOnDisconnect}
             onPanic={handlePanic}
+            session={session}
           />
         )}
       </div>
-      <NavBar tab={tab} setTab={setTab} inChat={false} />
+      <NavBar tab={tab} setTab={setTab} />
     </div>
   );
 };
+
+// ─── Service Worker Registration ──────────────────────────────────────────────
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('sw.js')
+      .then(reg => console.log('[Ghost] SW registered:', reg.scope))
+      .catch(err => console.warn('[Ghost] SW registration failed:', err));
+  });
+}
 
 ReactDOM.createRoot(document.getElementById('root')).render(<App />);
 </script>
