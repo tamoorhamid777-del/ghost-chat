@@ -1,0 +1,1416 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0" />
+  <title>Ghost — Private Bluetooth Chat</title>
+  <meta name="description" content="Ghost: No accounts. No servers. No trace. Privacy-first offline Bluetooth chat." />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+  <script src="https://unpkg.com/react@18/umd/react.production.min.js" crossorigin></script>
+  <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js" crossorigin></script>
+  <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: { mono: ['"JetBrains Mono"', 'monospace'] },
+          colors: {
+            ghost: {
+              bg: '#0a0a0a',
+              surface: '#111111',
+              card: '#161616',
+              border: '#1e1e1e',
+              cyan: '#00ffff',
+              'cyan-dim': '#00cccc',
+              'cyan-glow': 'rgba(0,255,255,0.15)',
+              red: '#ff3333',
+              'red-dim': '#cc2222',
+              'red-glow': 'rgba(255,51,51,0.15)',
+              text: '#e0e0e0',
+              muted: '#666666',
+              dim: '#333333',
+            }
+          },
+          animation: {
+            'radar-1': 'radarPulse 3s ease-out infinite',
+            'radar-2': 'radarPulse 3s ease-out 1s infinite',
+            'radar-3': 'radarPulse 3s ease-out 2s infinite',
+            'glitch': 'glitch 4s infinite',
+            'scan': 'scanLine 3s linear infinite',
+            'dots': 'dots 1.5s steps(4,end) infinite',
+            'fadeIn': 'fadeIn 0.4s ease-out',
+            'slideUp': 'slideUp 0.4s ease-out',
+            'burn': 'burn 0.6s ease-out forwards',
+            'lockSpin': 'lockSpin 0.5s ease-out forwards',
+            'keyFloat': 'keyFloat 2s ease-in-out infinite',
+            'pulse-cyan': 'pulseCyan 2s ease-in-out infinite',
+            'blink': 'blink 1s step-end infinite',
+          },
+          keyframes: {
+            radarPulse: {
+              '0%': { transform: 'scale(0.3)', opacity: '0.8' },
+              '100%': { transform: 'scale(1)', opacity: '0' },
+            },
+            glitch: {
+              '0%, 90%, 100%': { transform: 'translate(0)', filter: 'none' },
+              '91%': { transform: 'translate(-2px, 1px)', filter: 'hue-rotate(90deg)' },
+              '92%': { transform: 'translate(2px, -1px)', filter: 'hue-rotate(-90deg)' },
+              '93%': { transform: 'translate(0)', filter: 'none' },
+              '94%': { transform: 'translate(1px, 2px)', filter: 'brightness(1.5)' },
+              '95%': { transform: 'translate(0)', filter: 'none' },
+            },
+            scanLine: {
+              '0%': { top: '-10%' },
+              '100%': { top: '110%' },
+            },
+            dots: {
+              '0%': { content: '"."' },
+              '25%': { content: '".."' },
+              '50%': { content: '"..."' },
+              '75%': { content: '"...."' },
+            },
+            fadeIn: {
+              '0%': { opacity: '0' },
+              '100%': { opacity: '1' },
+            },
+            slideUp: {
+              '0%': { opacity: '0', transform: 'translateY(20px)' },
+              '100%': { opacity: '1', transform: 'translateY(0)' },
+            },
+            burn: {
+              '0%': { opacity: '1', transform: 'scale(1)', filter: 'none' },
+              '30%': { opacity: '0.8', transform: 'scale(1.02)', filter: 'brightness(2) saturate(0) sepia(1) hue-rotate(-30deg)' },
+              '60%': { opacity: '0.4', transform: 'scale(0.95)', filter: 'brightness(3) saturate(0) sepia(1) hue-rotate(-30deg)' },
+              '100%': { opacity: '0', transform: 'scale(0.8) translateY(-10px)', filter: 'brightness(0)' },
+            },
+            lockSpin: {
+              '0%': { transform: 'rotate(-20deg) scale(0.8)', opacity: '0.5' },
+              '100%': { transform: 'rotate(0deg) scale(1)', opacity: '1' },
+            },
+            keyFloat: {
+              '0%, 100%': { transform: 'translateY(0px) rotate(-5deg)' },
+              '50%': { transform: 'translateY(-8px) rotate(5deg)' },
+            },
+            pulseCyan: {
+              '0%, 100%': { boxShadow: '0 0 0 0 rgba(0,255,255,0.4)' },
+              '50%': { boxShadow: '0 0 0 8px rgba(0,255,255,0)' },
+            },
+            blink: {
+              '0%, 100%': { opacity: '1' },
+              '50%': { opacity: '0' },
+            },
+          }
+        }
+      }
+    }
+  </script>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      background: #0a0a0a;
+      font-family: 'JetBrains Mono', monospace;
+      color: #e0e0e0;
+      min-height: 100vh;
+      overflow-x: hidden;
+    }
+    #root { min-height: 100vh; }
+
+    /* Scrollbar */
+    ::-webkit-scrollbar { width: 4px; }
+    ::-webkit-scrollbar-track { background: #111; }
+    ::-webkit-scrollbar-thumb { background: #333; border-radius: 2px; }
+
+    /* Radar rings */
+    .radar-ring {
+      position: absolute;
+      border-radius: 50%;
+      border: 1px solid rgba(0,255,255,0.5);
+      animation: radarPulse 3s ease-out infinite;
+    }
+    .radar-ring:nth-child(2) { animation-delay: 1s; }
+    .radar-ring:nth-child(3) { animation-delay: 2s; }
+
+    /* Glitch effect */
+    .glitch-text {
+      animation: glitch 4s infinite;
+    }
+    .glitch-text::before,
+    .glitch-text::after {
+      content: attr(data-text);
+      position: absolute;
+      top: 0; left: 0;
+      width: 100%; height: 100%;
+    }
+    .glitch-text::before {
+      color: #00ffff;
+      animation: glitch 4s 0.1s infinite;
+      clip-path: polygon(0 0, 100% 0, 100% 35%, 0 35%);
+      transform: translate(-2px);
+    }
+    .glitch-text::after {
+      color: #ff3333;
+      animation: glitch 4s 0.2s infinite;
+      clip-path: polygon(0 65%, 100% 65%, 100% 100%, 0 100%);
+      transform: translate(2px);
+    }
+
+    /* Scan line overlay */
+    .scan-overlay {
+      position: absolute;
+      inset: 0;
+      background: repeating-linear-gradient(
+        0deg,
+        transparent,
+        transparent 2px,
+        rgba(0,255,255,0.015) 2px,
+        rgba(0,255,255,0.015) 4px
+      );
+      pointer-events: none;
+      z-index: 1;
+    }
+    .scan-line {
+      position: absolute;
+      left: 0; right: 0;
+      height: 2px;
+      background: linear-gradient(90deg, transparent, rgba(0,255,255,0.4), transparent);
+      animation: scanLine 3s linear infinite;
+      pointer-events: none;
+      z-index: 2;
+    }
+
+    /* Burn animation */
+    .burning {
+      animation: burn 0.6s ease-out forwards;
+    }
+
+    /* Signal bar */
+    .signal-bar {
+      display: inline-flex;
+      align-items: flex-end;
+      gap: 2px;
+      height: 16px;
+    }
+    .signal-bar span {
+      display: block;
+      width: 3px;
+      background: #00ffff;
+      border-radius: 1px;
+      opacity: 0.3;
+    }
+    .signal-bar span.active { opacity: 1; }
+
+    /* Dots animation */
+    .scanning-dots::after {
+      content: '';
+      animation: dots 1.5s steps(4,end) infinite;
+    }
+    @keyframes dots {
+      0%   { content: '.'; }
+      25%  { content: '..'; }
+      50%  { content: '...'; }
+      75%  { content: '....'; }
+      100% { content: '.'; }
+    }
+
+    /* Key exchange animation */
+    @keyframes keyExchange {
+      0%   { transform: translateX(-60px) rotate(-10deg); opacity: 0; }
+      30%  { transform: translateX(0) rotate(0deg); opacity: 1; }
+      70%  { transform: translateX(0) rotate(0deg); opacity: 1; }
+      100% { transform: translateX(60px) rotate(10deg); opacity: 0; }
+    }
+    .key-anim { animation: keyExchange 2s ease-in-out infinite; }
+
+    /* Progress bar */
+    @keyframes progressFill {
+      0%   { width: 0%; }
+      100% { width: 100%; }
+    }
+    .progress-fill { animation: progressFill 2s ease-out forwards; }
+
+    /* Lock locked */
+    @keyframes lockClose {
+      0%   { transform: translateY(-4px); }
+      100% { transform: translateY(0); }
+    }
+    .lock-close { animation: lockClose 0.3s ease-out 1.5s forwards; }
+
+    /* Toggle */
+    .toggle-track {
+      width: 44px; height: 24px;
+      border-radius: 12px;
+      position: relative;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+    .toggle-thumb {
+      position: absolute;
+      top: 3px; left: 3px;
+      width: 18px; height: 18px;
+      border-radius: 50%;
+      background: white;
+      transition: transform 0.2s;
+    }
+    .toggle-on .toggle-thumb { transform: translateX(20px); }
+
+    /* Message bubble */
+    .msg-bubble {
+      max-width: 75%;
+      padding: 10px 14px;
+      border-radius: 12px;
+      font-size: 13px;
+      line-height: 1.5;
+      position: relative;
+      transition: all 0.3s;
+    }
+    .msg-sent {
+      background: rgba(0,255,255,0.12);
+      border: 1px solid rgba(0,255,255,0.25);
+      color: #e0e0e0;
+      margin-left: auto;
+      border-bottom-right-radius: 3px;
+    }
+    .msg-recv {
+      background: #161616;
+      border: 1px solid #1e1e1e;
+      color: #e0e0e0;
+      margin-right: auto;
+      border-bottom-left-radius: 3px;
+    }
+
+    /* Glow effects */
+    .cyan-glow { box-shadow: 0 0 20px rgba(0,255,255,0.2); }
+    .red-glow  { box-shadow: 0 0 20px rgba(255,51,51,0.3); }
+    .btn-cyan {
+      background: rgba(0,255,255,0.1);
+      border: 1px solid rgba(0,255,255,0.4);
+      color: #00ffff;
+      transition: all 0.2s;
+    }
+    .btn-cyan:hover {
+      background: rgba(0,255,255,0.2);
+      box-shadow: 0 0 15px rgba(0,255,255,0.3);
+    }
+    .btn-red {
+      background: rgba(255,51,51,0.1);
+      border: 1px solid rgba(255,51,51,0.4);
+      color: #ff3333;
+      transition: all 0.2s;
+    }
+    .btn-red:hover {
+      background: rgba(255,51,51,0.25);
+      box-shadow: 0 0 15px rgba(255,51,51,0.4);
+    }
+
+    /* Watermark */
+    .watermark {
+      position: fixed;
+      bottom: 12px;
+      left: 50%;
+      transform: translateX(-50%);
+      font-size: 9px;
+      color: rgba(255,255,255,0.15);
+      letter-spacing: 0.15em;
+      pointer-events: none;
+      z-index: 100;
+      white-space: nowrap;
+    }
+
+    /* Nav bar */
+    .nav-bar {
+      display: flex;
+      border-top: 1px solid #1e1e1e;
+      background: #0d0d0d;
+    }
+    .nav-item {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 10px 4px 8px;
+      cursor: pointer;
+      transition: color 0.2s;
+      font-size: 9px;
+      color: #444;
+      gap: 4px;
+    }
+    .nav-item.active { color: #00ffff; }
+    .nav-item:hover { color: #888; }
+    .nav-item.active:hover { color: #00ffff; }
+
+    /* Device card */
+    .device-card {
+      background: #111;
+      border: 1px solid #1e1e1e;
+      border-radius: 10px;
+      padding: 14px 16px;
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      cursor: pointer;
+      transition: all 0.2s;
+      animation: slideUp 0.4s ease-out;
+    }
+    .device-card:hover {
+      border-color: rgba(0,255,255,0.3);
+      background: rgba(0,255,255,0.04);
+    }
+
+    /* Timer badge */
+    .timer-badge {
+      font-size: 10px;
+      padding: 2px 6px;
+      border-radius: 4px;
+      background: rgba(255,51,51,0.15);
+      border: 1px solid rgba(255,51,51,0.3);
+      color: #ff6666;
+      font-family: 'JetBrains Mono', monospace;
+    }
+
+    /* Input */
+    .chat-input {
+      background: #111;
+      border: 1px solid #1e1e1e;
+      color: #e0e0e0;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 13px;
+      outline: none;
+      transition: border-color 0.2s;
+      resize: none;
+    }
+    .chat-input:focus { border-color: rgba(0,255,255,0.4); }
+    .chat-input::placeholder { color: #444; }
+
+    /* Panic flash */
+    @keyframes panicFlash {
+      0%, 100% { background: #0a0a0a; }
+      25%, 75%  { background: rgba(255,51,51,0.08); }
+    }
+    .panic-flash { animation: panicFlash 0.4s ease-out; }
+
+    /* Responsive max width */
+    .app-shell {
+      max-width: 430px;
+      margin: 0 auto;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      position: relative;
+      background: #0a0a0a;
+    }
+  </style>
+</head>
+<body>
+<div id="root"></div>
+
+<script type="text/babel">
+const { useState, useEffect, useRef, useCallback } = React;
+
+// ─── Utilities ───────────────────────────────────────────────────────────────
+const randomHex = (len) => Array.from({length: len}, () => '0123456789ABCDEF'[Math.floor(Math.random()*16)]).join('');
+const generateDeviceId = () => `Ghost-${randomHex(4)}`;
+const generateMsgId = () => `msg_${Date.now()}_${Math.random().toString(36).slice(2,7)}`;
+
+const BURN_OPTIONS = [
+  { label: '10s',    seconds: 10 },
+  { label: '1 min',  seconds: 60 },
+  { label: '1 hr',   seconds: 3600 },
+  { label: 'On Read', seconds: null },
+];
+
+const MOCK_RECV_MESSAGES = [
+  "hey, you there?",
+  "this is wild, no accounts needed 👻",
+  "messages disappear after the timer, right?",
+  "yeah exactly. zero trace.",
+  "love the burn animation lol",
+  "so this is fully offline?",
+  "bluetooth only. no internet required.",
+  "that's actually insane",
+  "ok i'm sold. switching from signal",
+  "don't tell anyone about this app 🤫",
+  "too late, already sharing it",
+  "wait it's open source?",
+  "yep. apache 2.0. check github.",
+  "respect 🔥",
+  "my message just burned lmao",
+  "the countdown timer is so satisfying",
+  "ok gotta go. wipe on disconnect?",
+  "yeah it's on by default",
+  "perfect. ghost mode activated 👻",
+];
+
+// ─── SVG Icons ────────────────────────────────────────────────────────────────
+const Icon = ({ name, size = 20, color = 'currentColor', strokeWidth = 1.5 }) => {
+  const paths = {
+    ghost: (
+      <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth={strokeWidth} strokeLinecap="round" strokeLinejoin="round">
+        <path d="M9 10h.01M15 10h.01M12 2a8 8 0 0 1 8 8v10l-3-2-2 2-2-2-2 2-2-2-3 2V10a8 8 0 0 1 8-8z"/>
+      </svg>
+    ),
+    shield: (
+      <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth={strokeWidth} strokeLinecap="round" strokeLinejoin="round">
+        <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+      </svg>
+    ),
+    lock: (
+      <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth={strokeWidth} strokeLinecap="round" strokeLinejoin="round">
+        <rect x="3" y="11" width="18" height="11" rx="2" ry="2"/>
+        <path d="M7 11V7a5 5 0 0 1 10 0v4"/>
+      </svg>
+    ),
+    unlock: (
+      <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth={strokeWidth} strokeLinecap="round" strokeLinejoin="round">
+        <rect x="3" y="11" width="18" height="11" rx="2" ry="2"/>
+        <path d="M7 11V7a5 5 0 0 1 9.9-1"/>
+      </svg>
+    ),
+    bluetooth: (
+      <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth={strokeWidth} strokeLinecap="round" strokeLinejoin="round">
+        <polyline points="6.5 6.5 17.5 17.5 12 23 12 1 17.5 6.5 6.5 17.5"/>
+      </svg>
+    ),
+    wifi: (
+      <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth={strokeWidth} strokeLinecap="round" strokeLinejoin="round">
+        <path d="M5 12.55a11 11 0 0 1 14.08 0"/><path d="M1.42 9a16 16 0 0 1 21.16 0"/>
+        <path d="M8.53 16.11a6 6 0 0 1 6.95 0"/><line x1="12" y1="20" x2="12.01" y2="20"/>
+      </svg>
+    ),
+    eye_off: (
+      <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth={strokeWidth} strokeLinecap="round" strokeLinejoin="round">
+        <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"/>
+        <line x1="1" y1="1" x2="23" y2="23"/>
+      </svg>
+    ),
+    server_off: (
+      <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth={strokeWidth} strokeLinecap="round" strokeLinejoin="round">
+        <rect x="2" y="2" width="20" height="8" rx="2" ry="2"/><rect x="2" y="14" width="20" height="8" rx="2" ry="2"/>
+        <line x1="6" y1="6" x2="6.01" y2="6"/><line x1="6" y1="18" x2="6.01" y2="18"/>
+        <line x1="1" y1="1" x2="23" y2="23"/>
+      </svg>
+    ),
+    trash: (
+      <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth={strokeWidth} strokeLinecap="round" strokeLinejoin="round">
+        <polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/>
+      </svg>
+    ),
+    send: (
+      <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth={strokeWidth} strokeLinecap="round" strokeLinejoin="round">
+        <line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/>
+      </svg>
+    ),
+    settings: (
+      <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth={strokeWidth} strokeLinecap="round" strokeLinejoin="round">
+        <circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/>
+      </svg>
+    ),
+    message: (
+      <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth={strokeWidth} strokeLinecap="round" strokeLinejoin="round">
+        <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
+      </svg>
+    ),
+    radio: (
+      <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth={strokeWidth} strokeLinecap="round" strokeLinejoin="round">
+        <circle cx="12" cy="12" r="2"/><path d="M16.24 7.76a6 6 0 0 1 0 8.49m-8.48-.01a6 6 0 0 1 0-8.49m11.31-2.82a10 10 0 0 1 0 14.14m-14.14 0a10 10 0 0 1 0-14.14"/>
+      </svg>
+    ),
+    key: (
+      <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth={strokeWidth} strokeLinecap="round" strokeLinejoin="round">
+        <path d="M21 2l-2 2m-7.61 7.61a5.5 5.5 0 1 1-7.778 7.778 5.5 5.5 0 0 1 7.777-7.777zm0 0L15.5 7.5m0 0l3 3L22 7l-3-3m-3.5 3.5L19 4"/>
+      </svg>
+    ),
+    zap: (
+      <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth={strokeWidth} strokeLinecap="round" strokeLinejoin="round">
+        <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/>
+      </svg>
+    ),
+    user: (
+      <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth={strokeWidth} strokeLinecap="round" strokeLinejoin="round">
+        <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/>
+      </svg>
+    ),
+    check: (
+      <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth={strokeWidth} strokeLinecap="round" strokeLinejoin="round">
+        <polyline points="20 6 9 17 4 12"/>
+      </svg>
+    ),
+    x: (
+      <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth={strokeWidth} strokeLinecap="round" strokeLinejoin="round">
+        <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
+      </svg>
+    ),
+    flame: (
+      <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth={strokeWidth} strokeLinecap="round" strokeLinejoin="round">
+        <path d="M8.5 14.5A2.5 2.5 0 0 0 11 12c0-1.38-.5-2-1-3-1.072-2.143-.224-4.054 2-6 .5 2.5 2 4.9 4 6.5 2 1.6 3 3.5 3 5.5a7 7 0 1 1-14 0c0-1.153.433-2.294 1-3a2.5 2.5 0 0 0 2.5 2.5z"/>
+      </svg>
+    ),
+    github: (
+      <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth={strokeWidth} strokeLinecap="round" strokeLinejoin="round">
+        <path d="M9 19c-5 1.5-5-2.5-7-3m14 6v-3.87a3.37 3.37 0 0 0-.94-2.61c3.14-.35 6.44-1.54 6.44-7A5.44 5.44 0 0 0 20 4.77 5.07 5.07 0 0 0 19.91 1S18.73.65 16 2.48a13.38 13.38 0 0 0-7 0C6.27.65 5.09 1 5.09 1A5.07 5.07 0 0 0 5 4.77a5.44 5.44 0 0 0-1.5 3.78c0 5.42 3.3 6.61 6.44 7A3.37 3.37 0 0 0 9 18.13V22"/>
+      </svg>
+    ),
+    info: (
+      <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth={strokeWidth} strokeLinecap="round" strokeLinejoin="round">
+        <circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/>
+      </svg>
+    ),
+    arrow_left: (
+      <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth={strokeWidth} strokeLinecap="round" strokeLinejoin="round">
+        <line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/>
+      </svg>
+    ),
+  };
+  return paths[name] || null;
+};
+
+// ─── Signal Bars ──────────────────────────────────────────────────────────────
+const SignalBars = ({ strength }) => {
+  const heights = [4, 7, 10, 14, 18];
+  return (
+    <div className="signal-bar">
+      {heights.map((h, i) => (
+        <span key={i} className={i < strength ? 'active' : ''} style={{ height: h }} />
+      ))}
+    </div>
+  );
+};
+
+// ─── Screen 1: Splash ─────────────────────────────────────────────────────────
+const SplashScreen = ({ onStart }) => {
+  const [visible, setVisible] = useState(false);
+  useEffect(() => { setTimeout(() => setVisible(true), 100); }, []);
+
+  return (
+    <div className="flex flex-col items-center justify-center min-h-screen px-6 relative overflow-hidden"
+         style={{ background: '#0a0a0a' }}>
+      {/* Scan lines */}
+      <div className="scan-overlay" />
+      <div className="scan-line" />
+
+      {/* Background glow */}
+      <div style={{
+        position: 'absolute', top: '30%', left: '50%',
+        transform: 'translate(-50%,-50%)',
+        width: 300, height: 300,
+        background: 'radial-gradient(circle, rgba(0,255,255,0.06) 0%, transparent 70%)',
+        pointerEvents: 'none'
+      }} />
+
+      <div className={`flex flex-col items-center gap-8 z-10 transition-all duration-700 ${visible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'}`}
+           style={{ transform: visible ? 'translateY(0)' : 'translateY(20px)' }}>
+
+        {/* Logo */}
+        <div className="relative flex items-center justify-center" style={{ width: 120, height: 120 }}>
+          {/* Shield background */}
+          <div style={{
+            position: 'absolute', inset: 0,
+            display: 'flex', alignItems: 'center', justifyContent: 'center',
+            color: 'rgba(0,255,255,0.15)'
+          }}>
+            <Icon name="shield" size={120} color="rgba(0,255,255,0.12)" strokeWidth={1} />
+          </div>
+          {/* Ghost icon */}
+          <div className="glitch-text relative z-10" data-text="" style={{ color: '#00ffff' }}>
+            <Icon name="ghost" size={56} color="#00ffff" strokeWidth={1.5} />
+          </div>
+        </div>
+
+        {/* Title */}
+        <div className="text-center">
+          <h1 className="text-5xl font-bold tracking-widest" style={{ color: '#00ffff', letterSpacing: '0.3em' }}>
+            GHOST
+          </h1>
+          <p className="text-xs mt-2 tracking-widest" style={{ color: '#444', letterSpacing: '0.25em' }}>
+            v1.0.0 · PROTOTYPE
+          </p>
+        </div>
+
+        {/* Tagline */}
+        <p className="text-center text-sm" style={{ color: '#888', maxWidth: 260, lineHeight: 1.7 }}>
+          No accounts. No servers. No trace.
+        </p>
+
+        {/* Privacy bullets */}
+        <div className="flex flex-col gap-3 w-full" style={{ maxWidth: 300 }}>
+          {[
+            { icon: 'eye_off',    text: 'Zero identity — anonymous by design' },
+            { icon: 'server_off', text: 'No servers — peer-to-peer Bluetooth only' },
+            { icon: 'flame',      text: 'Self-destructing messages — no history' },
+          ].map(({ icon, text }) => (
+            <div key={icon} className="flex items-center gap-3 px-4 py-3 rounded-lg"
+                 style={{ background: '#111', border: '1px solid #1e1e1e' }}>
+              <div style={{ color: '#00ffff', flexShrink: 0 }}>
+                <Icon name={icon} size={16} color="#00ffff" />
+              </div>
+              <span className="text-xs" style={{ color: '#aaa' }}>{text}</span>
+            </div>
+          ))}
+        </div>
+
+        {/* CTA */}
+        <button
+          onClick={onStart}
+          className="btn-cyan w-full py-4 rounded-xl text-sm font-semibold tracking-widest uppercase cyan-glow"
+          style={{ maxWidth: 300, letterSpacing: '0.2em' }}
+          aria-label="Start Ghost app"
+        >
+          ▶ Start Ghost
+        </button>
+
+        <p className="text-xs text-center" style={{ color: '#333', maxWidth: 260, lineHeight: 1.6 }}>
+          Open source · Apache 2.0 · No telemetry
+        </p>
+      </div>
+    </div>
+  );
+};
+
+// ─── Screen 2: Scanner ────────────────────────────────────────────────────────
+const ScannerScreen = ({ onConnect }) => {
+  const [devices, setDevices] = useState([]);
+  const [scanning, setScanning] = useState(true);
+
+  useEffect(() => {
+    // Generate devices progressively
+    const ids = Array.from({ length: 5 }, () => ({
+      id: generateDeviceId(),
+      strength: Math.floor(Math.random() * 3) + 2,
+      rssi: -(Math.floor(Math.random() * 40) + 50),
+      type: ['Phone', 'Laptop', 'Tablet'][Math.floor(Math.random() * 3)],
+    }));
+
+    const timers = ids.map((dev, i) =>
+      setTimeout(() => setDevices(prev => [...prev, dev]), 800 + i * 700)
+    );
+    const stopTimer = setTimeout(() => setScanning(false), 5000);
+
+    return () => { timers.forEach(clearTimeout); clearTimeout(stopTimer); };
+  }, []);
+
+  return (
+    <div className="flex flex-col min-h-screen" style={{ background: '#0a0a0a' }}>
+      {/* Header */}
+      <div className="px-5 pt-12 pb-4">
+        <div className="flex items-center gap-2 mb-1">
+          <Icon name="bluetooth" size={14} color="#00ffff" />
+          <span className="text-xs tracking-widest uppercase" style={{ color: '#00ffff', letterSpacing: '0.2em' }}>
+            Bluetooth Scanner
+          </span>
+        </div>
+        <h2 className="text-xl font-bold" style={{ color: '#e0e0e0' }}>Nearby Devices</h2>
+      </div>
+
+      {/* Radar */}
+      <div className="flex items-center justify-center py-6 relative" style={{ height: 200 }}>
+        {/* Rings */}
+        {[80, 120, 160].map((size, i) => (
+          <div key={i} className="radar-ring absolute" style={{
+            width: size, height: size,
+            animationDelay: `${i}s`,
+            borderColor: `rgba(0,255,255,${0.5 - i * 0.12})`,
+          }} />
+        ))}
+        {/* Center dot */}
+        <div style={{
+          width: 12, height: 12, borderRadius: '50%',
+          background: '#00ffff',
+          boxShadow: '0 0 12px #00ffff, 0 0 24px rgba(0,255,255,0.5)',
+          zIndex: 10,
+        }} />
+        {/* Sweep line */}
+        <div style={{
+          position: 'absolute',
+          width: 80, height: 1,
+          background: 'linear-gradient(90deg, rgba(0,255,255,0.8), transparent)',
+          transformOrigin: 'left center',
+          animation: 'spin 2s linear infinite',
+          zIndex: 5,
+        }} />
+      </div>
+
+      {/* Status */}
+      <div className="px-5 mb-4 flex items-center gap-2">
+        <div style={{
+          width: 6, height: 6, borderRadius: '50%',
+          background: scanning ? '#00ffff' : '#444',
+          boxShadow: scanning ? '0 0 6px #00ffff' : 'none',
+          animation: scanning ? 'pulseCyan 1s ease-in-out infinite' : 'none',
+        }} />
+        <span className="text-xs" style={{ color: scanning ? '#00ffff' : '#666' }}>
+          {scanning ? <span>Scanning<span className="scanning-dots" /></span> : `Found ${devices.length} device${devices.length !== 1 ? 's' : ''}`}
+        </span>
+        <span className="ml-auto text-xs" style={{ color: '#333' }}>PROTOTYPE · Simulated BT</span>
+      </div>
+
+      {/* Device list */}
+      <div className="flex-1 px-5 flex flex-col gap-3 overflow-y-auto pb-6">
+        {devices.map((dev) => (
+          <div key={dev.id} className="device-card" onClick={() => onConnect(dev)}
+               role="button" aria-label={`Connect to ${dev.id}`} tabIndex={0}
+               onKeyDown={e => e.key === 'Enter' && onConnect(dev)}>
+            {/* Icon */}
+            <div style={{
+              width: 40, height: 40, borderRadius: 10,
+              background: 'rgba(0,255,255,0.08)',
+              border: '1px solid rgba(0,255,255,0.15)',
+              display: 'flex', alignItems: 'center', justifyContent: 'center',
+              flexShrink: 0,
+            }}>
+              <Icon name="ghost" size={20} color="#00ffff" />
+            </div>
+            {/* Info */}
+            <div className="flex-1 min-w-0">
+              <div className="font-semibold text-sm" style={{ color: '#e0e0e0' }}>{dev.id}</div>
+              <div className="text-xs mt-0.5" style={{ color: '#555' }}>
+                {dev.type} · {dev.rssi} dBm
+              </div>
+            </div>
+            {/* Signal */}
+            <div className="flex flex-col items-end gap-1">
+              <SignalBars strength={dev.strength} />
+              <span className="text-xs" style={{ color: '#00ffff' }}>Tap to connect</span>
+            </div>
+          </div>
+        ))}
+
+        {devices.length === 0 && (
+          <div className="flex flex-col items-center justify-center py-12 gap-3">
+            <div style={{ color: '#222' }}><Icon name="bluetooth" size={32} color="#222" /></div>
+            <span className="text-xs" style={{ color: '#333' }}>Searching for nearby Ghost devices<span className="scanning-dots" /></span>
+          </div>
+        )}
+      </div>
+
+      {/* Watermark */}
+      <div className="watermark">PROTOTYPE · SIMULATED BLUETOOTH · NO REAL NETWORKING</div>
+
+      <style>{`@keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }`}</style>
+    </div>
+  );
+};
+
+// ─── Screen 3: Pairing ────────────────────────────────────────────────────────
+const PairingScreen = ({ device, onPaired }) => {
+  const [phase, setPhase] = useState(0); // 0=exchanging, 1=locked
+  const [progress, setProgress] = useState(0);
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setProgress(p => {
+        if (p >= 100) { clearInterval(interval); return 100; }
+        return p + 2;
+      });
+    }, 40);
+
+    const t1 = setTimeout(() => setPhase(1), 1500);
+    const t2 = setTimeout(() => onPaired(), 2800);
+
+    return () => { clearInterval(interval); clearTimeout(t1); clearTimeout(t2); };
+  }, []);
+
+  const steps = [
+    { label: 'Generating ephemeral key pair', done: progress > 20 },
+    { label: 'Exchanging public keys', done: progress > 50 },
+    { label: 'Deriving shared secret (ECDH)', done: progress > 75 },
+    { label: 'Establishing encrypted tunnel', done: progress >= 100 },
+  ];
+
+  return (
+    <div className="flex flex-col items-center justify-center min-h-screen px-6 gap-8"
+         style={{ background: '#0a0a0a' }}>
+      <div className="scan-overlay" />
+
+      {/* Lock icon */}
+      <div className="relative flex items-center justify-center" style={{ height: 100 }}>
+        <div style={{
+          color: phase === 1 ? '#00ffff' : '#333',
+          transition: 'color 0.5s',
+          filter: phase === 1 ? 'drop-shadow(0 0 12px rgba(0,255,255,0.6))' : 'none',
+          animation: phase === 1 ? 'lockSpin 0.5s ease-out' : 'none',
+        }}>
+          <Icon name={phase === 1 ? 'lock' : 'unlock'} size={64} color={phase === 1 ? '#00ffff' : '#333'} strokeWidth={1} />
+        </div>
+      </div>
+
+      {/* Key exchange animation */}
+      {phase === 0 && (
+        <div className="flex items-center gap-4" style={{ height: 40 }}>
+          <div className="key-anim" style={{ color: '#00ffff' }}>
+            <Icon name="key" size={24} color="#00ffff" />
+          </div>
+          <div style={{ width: 60, height: 1, background: 'linear-gradient(90deg, #00ffff, transparent, #00ffff)', opacity: 0.5 }} />
+          <div className="key-anim" style={{ color: '#00ffff', animationDelay: '1s', transform: 'scaleX(-1)' }}>
+            <Icon name="key" size={24} color="#00ffff" />
+          </div>
+        </div>
+      )}
+
+      {/* Title */}
+      <div className="text-center">
+        <h2 className="text-lg font-bold mb-1" style={{ color: '#e0e0e0' }}>
+          {phase === 0 ? 'Establishing Encrypted Tunnel' : 'Tunnel Secured'}
+        </h2>
+        <p className="text-xs" style={{ color: '#555' }}>Connecting to {device?.id}</p>
+      </div>
+
+      {/* Progress bar */}
+      <div className="w-full" style={{ maxWidth: 300 }}>
+        <div style={{ height: 2, background: '#1e1e1e', borderRadius: 1, overflow: 'hidden' }}>
+          <div style={{
+            height: '100%',
+            width: `${progress}%`,
+            background: '#00ffff',
+            boxShadow: '0 0 8px rgba(0,255,255,0.6)',
+            transition: 'width 0.1s linear',
+            borderRadius: 1,
+          }} />
+        </div>
+        <div className="flex justify-between mt-1">
+          <span className="text-xs" style={{ color: '#333' }}>{progress}%</span>
+          <span className="text-xs" style={{ color: '#333' }}>AES-256-GCM</span>
+        </div>
+      </div>
+
+      {/* Steps */}
+      <div className="flex flex-col gap-2 w-full" style={{ maxWidth: 300 }}>
+        {steps.map(({ label, done }) => (
+          <div key={label} className="flex items-center gap-3">
+            <div style={{
+              width: 16, height: 16, borderRadius: '50%', flexShrink: 0,
+              background: done ? 'rgba(0,255,255,0.15)' : '#111',
+              border: `1px solid ${done ? '#00ffff' : '#222'}`,
+              display: 'flex', alignItems: 'center', justifyContent: 'center',
+              transition: 'all 0.3s',
+            }}>
+              {done && <Icon name="check" size={10} color="#00ffff" strokeWidth={2.5} />}
+            </div>
+            <span className="text-xs" style={{ color: done ? '#aaa' : '#333', transition: 'color 0.3s' }}>
+              {label}
+            </span>
+          </div>
+        ))}
+      </div>
+
+      {/* Badge */}
+      {phase === 1 && (
+        <div className="flex items-center gap-2 px-4 py-2 rounded-full"
+             style={{ background: 'rgba(0,255,255,0.08)', border: '1px solid rgba(0,255,255,0.2)', animation: 'fadeIn 0.4s ease-out' }}>
+          <Icon name="lock" size={12} color="#00ffff" />
+          <span className="text-xs" style={{ color: '#00ffff', letterSpacing: '0.1em' }}>
+            E2E Encrypted · Session Only · No Logs
+          </span>
+        </div>
+      )}
+    </div>
+  );
+};
+
+// ─── Screen 4: Chat ───────────────────────────────────────────────────────────
+const ChatScreen = ({ device, defaultBurnSeconds, onBack }) => {
+  const [messages, setMessages] = useState([]);
+  const [input, setInput] = useState('');
+  const [burnOption, setBurnOption] = useState(
+    BURN_OPTIONS.find(o => o.seconds === defaultBurnSeconds) || BURN_OPTIONS[0]
+  );
+  const [burningIds, setBurningIds] = useState(new Set());
+  const messagesEndRef = useRef(null);
+  const recvIndexRef = useRef(0);
+  const inputRef = useRef(null);
+
+  // Auto-scroll
+  useEffect(() => {
+    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+  }, [messages]);
+
+  // Countdown tick
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setMessages(prev => prev.map(msg => {
+        if (msg.remaining === null || msg.remaining <= 0 || msg.burning) return msg;
+        return { ...msg, remaining: msg.remaining - 1 };
+      }));
+    }, 1000);
+    return () => clearInterval(interval);
+  }, []);
+
+  // Trigger burn when remaining hits 0
+  useEffect(() => {
+    messages.forEach(msg => {
+      if (msg.remaining === 0 && !msg.burning && !burningIds.has(msg.id)) {
+        triggerBurn(msg.id);
+      }
+    });
+  }, [messages]);
+
+  // Auto-receive mock messages
+  useEffect(() => {
+    const scheduleNext = () => {
+      const delay = 4000 + Math.random() * 6000;
+      return setTimeout(() => {
+        if (recvIndexRef.current < MOCK_RECV_MESSAGES.length) {
+          const text = MOCK_RECV_MESSAGES[recvIndexRef.current++];
+          const burnSec = [10, 60, 3600, null][Math.floor(Math.random() * 4)];
+          addMessage({ text, sent: false, burnSeconds: burnSec });
+          scheduleNext();
+        }
+      }, delay);
+    };
+    // First message after 2s
+    const t = setTimeout(() => {
+      addMessage({ text: MOCK_RECV_MESSAGES[recvIndexRef.current++], sent: false, burnSeconds: 60 });
+      scheduleNext();
+    }, 2000);
+    return () => clearTimeout(t);
+  }, []);
+
+  const addMessage = useCallback(({ text, sent, burnSeconds }) => {
+    const msg = {
+      id: generateMsgId(),
+      text,
+      sent,
+      burnSeconds,
+      remaining: burnSeconds,
+      burning: false,
+      timestamp: new Date(),
+    };
+    setMessages(prev => [...prev, msg]);
+  }, []);
+
+  const triggerBurn = useCallback((id) => {
+    setBurningIds(prev => new Set([...prev, id]));
+    setMessages(prev => prev.map(m => m.id === id ? { ...m, burning: true } : m));
+    setTimeout(() => {
+      setMessages(prev => prev.filter(m => m.id !== id));
+      setBurningIds(prev => { const s = new Set(prev); s.delete(id); return s; });
+    }, 650);
+  }, []);
+
+  const sendMessage = useCallback(() => {
+    const text = input.trim();
+    if (!text) return;
+    addMessage({ text, sent: true, burnSeconds: burnOption.seconds });
+    setInput('');
+    inputRef.current?.focus();
+  }, [input, burnOption, addMessage]);
+
+  const handleKeyDown = (e) => {
+    if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendMessage(); }
+  };
+
+  const formatRemaining = (sec) => {
+    if (sec === null) return 'On Read';
+    if (sec >= 3600) return `${Math.floor(sec/3600)}h ${Math.floor((sec%3600)/60)}m`;
+    if (sec >= 60) return `${Math.floor(sec/60)}m ${sec%60}s`;
+    return `${sec}s`;
+  };
+
+  return (
+    <div className="flex flex-col" style={{ height: '100vh', background: '#0a0a0a' }}>
+      {/* Header */}
+      <div style={{ background: '#0d0d0d', borderBottom: '1px solid #1a1a1a', padding: '12px 16px', flexShrink: 0 }}>
+        <div className="flex items-center gap-3">
+          <button onClick={onBack} className="p-1 rounded" style={{ color: '#555' }} aria-label="Go back">
+            <Icon name="arrow_left" size={18} color="#555" />
+          </button>
+          <div style={{
+            width: 36, height: 36, borderRadius: 10,
+            background: 'rgba(0,255,255,0.08)',
+            border: '1px solid rgba(0,255,255,0.2)',
+            display: 'flex', alignItems: 'center', justifyContent: 'center',
+          }}>
+            <Icon name="ghost" size={18} color="#00ffff" />
+          </div>
+          <div className="flex-1">
+            <div className="text-sm font-semibold" style={{ color: '#e0e0e0' }}>{device?.id}</div>
+            <div className="flex items-center gap-1">
+              <div style={{ width: 5, height: 5, borderRadius: '50%', background: '#00ffff', boxShadow: '0 0 4px #00ffff' }} />
+              <span className="text-xs" style={{ color: '#00ffff' }}>🔒 E2E Encrypted</span>
+            </div>
+          </div>
+          <div className="text-xs text-right" style={{ color: '#333' }}>
+            <div>Session</div>
+            <div>Only</div>
+          </div>
+        </div>
+      </div>
+
+      {/* Messages */}
+      <div className="flex-1 overflow-y-auto px-4 py-4 flex flex-col gap-3" style={{ minHeight: 0 }}>
+        {messages.length === 0 && (
+          <div className="flex flex-col items-center justify-center flex-1 gap-3 py-12">
+            <Icon name="lock" size={28} color="#222" />
+            <p className="text-xs text-center" style={{ color: '#333', maxWidth: 200, lineHeight: 1.6 }}>
+              Encrypted session started. Messages self-destruct after their timer expires.
+            </p>
+          </div>
+        )}
+
+        {messages.map(msg => (
+          <div key={msg.id}
+               className={`flex flex-col ${msg.sent ? 'items-end' : 'items-start'} ${msg.burning ? 'burning' : ''}`}
+               style={{ animation: 'slideUp 0.3s ease-out' }}>
+            <div className={`msg-bubble ${msg.sent ? 'msg-sent' : 'msg-recv'}`}
+                 style={msg.burning ? { pointerEvents: 'none' } : {}}>
+              <p style={{ wordBreak: 'break-word' }}>{msg.text}</p>
+              {/* Timer */}
+              {msg.remaining !== null && (
+                <div className="flex items-center gap-1 mt-2">
+                  <Icon name="flame" size={10} color={msg.remaining <= 10 ? '#ff3333' : '#555'} />
+                  <span className="timer-badge" style={{
+                    color: msg.remaining <= 10 ? '#ff6666' : '#666',
+                    borderColor: msg.remaining <= 10 ? 'rgba(255,51,51,0.4)' : 'rgba(255,255,255,0.08)',
+                    background: msg.remaining <= 10 ? 'rgba(255,51,51,0.15)' : 'rgba(255,255,255,0.04)',
+                    animation: msg.remaining <= 5 ? 'blink 0.5s step-end infinite' : 'none',
+                  }}>
+                    {formatRemaining(msg.remaining)}
+                  </span>
+                </div>
+              )}
+              {msg.remaining === null && (
+                <div className="flex items-center gap-1 mt-2">
+                  <Icon name="eye_off" size={10} color="#444" />
+                  <span className="text-xs" style={{ color: '#444' }}>Burns on read</span>
+                </div>
+              )}
+            </div>
+            <span className="text-xs mt-1 px-1" style={{ color: '#333' }}>
+              {msg.timestamp.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+            </span>
+          </div>
+        ))}
+        <div ref={messagesEndRef} />
+      </div>
+
+      {/* Footer note */}
+      <div className="text-center py-1" style={{ borderTop: '1px solid #111', flexShrink: 0 }}>
+        <span className="text-xs" style={{ color: '#2a2a2a' }}>Session only — no messages saved</span>
+      </div>
+
+      {/* Input area */}
+      <div style={{ background: '#0d0d0d', borderTop: '1px solid #1a1a1a', padding: '12px 16px', flexShrink: 0 }}>
+        {/* Burn timer selector */}
+        <div className="flex items-center gap-2 mb-3">
+          <Icon name="flame" size={12} color="#555" />
+          <span className="text-xs" style={{ color: '#444' }}>Burn after:</span>
+          <div className="flex gap-1 flex-1">
+            {BURN_OPTIONS.map(opt => (
+              <button key={opt.label}
+                      onClick={() => setBurnOption(opt)}
+                      className="text-xs px-2 py-1 rounded"
+                      style={{
+                        background: burnOption.label === opt.label ? 'rgba(255,51,51,0.15)' : '#111',
+                        border: `1px solid ${burnOption.label === opt.label ? 'rgba(255,51,51,0.4)' : '#1e1e1e'}`,
+                        color: burnOption.label === opt.label ? '#ff6666' : '#444',
+                        transition: 'all 0.15s',
+                      }}
+                      aria-label={`Set burn timer to ${opt.label}`}
+                      aria-pressed={burnOption.label === opt.label}>
+                {opt.label}
+              </button>
+            ))}
+          </div>
+        </div>
+
+        {/* Input row */}
+        <div className="flex gap-2 items-end">
+          <textarea
+            ref={inputRef}
+            className="chat-input flex-1 px-3 py-2 rounded-xl"
+            rows={1}
+            placeholder="Type a message..."
+            value={input}
+            onChange={e => setInput(e.target.value)}
+            onKeyDown={handleKeyDown}
+            aria-label="Message input"
+            style={{ maxHeight: 100, overflowY: 'auto' }}
+          />
+          <button
+            onClick={sendMessage}
+            disabled={!input.trim()}
+            className="btn-cyan p-3 rounded-xl flex-shrink-0"
+            style={{ opacity: input.trim() ? 1 : 0.4 }}
+            aria-label="Send message">
+            <Icon name="send" size={18} color="#00ffff" />
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+// ─── Screen 5: Settings ───────────────────────────────────────────────────────
+const SettingsScreen = ({ defaultBurnSeconds, setDefaultBurnSeconds, wipeOnDisconnect, setWipeOnDisconnect, onPanic }) => {
+  const [panicked, setPanicked] = useState(false);
+
+  const handlePanic = () => {
+    setPanicked(true);
+    onPanic();
+    setTimeout(() => setPanicked(false), 500);
+  };
+
+  return (
+    <div className="flex flex-col min-h-screen" style={{ background: panicked ? 'rgba(255,51,51,0.05)' : '#0a0a0a', transition: 'background 0.3s' }}>
+      {/* Header */}
+      <div className="px-5 pt-12 pb-6">
+        <div className="flex items-center gap-2 mb-1">
+          <Icon name="settings" size={14} color="#555" />
+          <span className="text-xs tracking-widest uppercase" style={{ color: '#555', letterSpacing: '0.2em' }}>
+            Configuration
+          </span>
+        </div>
+        <h2 className="text-xl font-bold" style={{ color: '#e0e0e0' }}>Settings</h2>
+      </div>
+
+      <div className="flex-1 px-5 flex flex-col gap-4 pb-8">
+        {/* Default burn timer */}
+        <div style={{ background: '#111', border: '1px solid #1e1e1e', borderRadius: 12, padding: '16px' }}>
+          <div className="flex items-center gap-2 mb-3">
+            <Icon name="flame" size={14} color="#ff6666" />
+            <span className="text-sm font-semibold" style={{ color: '#e0e0e0' }}>Default Burn Timer</span>
+          </div>
+          <div className="grid grid-cols-2 gap-2">
+            {BURN_OPTIONS.map(opt => (
+              <button key={opt.label}
+                      onClick={() => setDefaultBurnSeconds(opt.seconds)}
+                      className="py-2 px-3 rounded-lg text-xs text-left"
+                      style={{
+                        background: defaultBurnSeconds === opt.seconds ? 'rgba(255,51,51,0.12)' : '#0d0d0d',
+                        border: `1px solid ${defaultBurnSeconds === opt.seconds ? 'rgba(255,51,51,0.35)' : '#1a1a1a'}`,
+                        color: defaultBurnSeconds === opt.seconds ? '#ff6666' : '#555',
+                        transition: 'all 0.15s',
+                      }}
+                      aria-pressed={defaultBurnSeconds === opt.seconds}>
+                {opt.label}
+              </button>
+            ))}
+          </div>
+        </div>
+
+        {/* Wipe on disconnect */}
+        <div style={{ background: '#111', border: '1px solid #1e1e1e', borderRadius: 12, padding: '16px' }}>
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <Icon name="zap" size={14} color="#00ffff" />
+              <div>
+                <div className="text-sm font-semibold" style={{ color: '#e0e0e0' }}>Wipe on Disconnect</div>
+                <div className="text-xs mt-0.5" style={{ color: '#444' }}>Clear all session data when peer disconnects</div>
+              </div>
+            </div>
+            <div
+              className={`toggle-track ${wipeOnDisconnect ? 'toggle-on' : ''}`}
+              style={{ background: wipeOnDisconnect ? 'rgba(0,255,255,0.3)' : '#1e1e1e', border: `1px solid ${wipeOnDisconnect ? 'rgba(0,255,255,0.5)' : '#2a2a2a'}` }}
+              onClick={() => setWipeOnDisconnect(v => !v)}
+              role="switch" aria-checked={wipeOnDisconnect} tabIndex={0}
+              onKeyDown={e => e.key === 'Enter' && setWipeOnDisconnect(v => !v)}>
+              <div className="toggle-thumb" />
+            </div>
+          </div>
+        </div>
+
+        {/* Privacy info */}
+        <div style={{ background: '#111', border: '1px solid #1e1e1e', borderRadius: 12, padding: '16px' }}>
+          <div className="flex items-center gap-2 mb-3">
+            <Icon name="info" size={14} color="#555" />
+            <span className="text-sm font-semibold" style={{ color: '#e0e0e0' }}>Privacy Model</span>
+          </div>
+          {[
+            ['No account required', 'Anonymous ephemeral identity per session'],
+            ['No message storage', 'Messages exist only in RAM, never on disk'],
+            ['No network calls', 'Zero telemetry, zero analytics, zero servers'],
+            ['Session keys', 'New ECDH key pair generated every session'],
+          ].map(([title, desc]) => (
+            <div key={title} className="flex gap-3 mb-3 last:mb-0">
+              <div style={{ color: '#00ffff', flexShrink: 0, marginTop: 1 }}>
+                <Icon name="check" size={12} color="#00ffff" strokeWidth={2.5} />
+              </div>
+              <div>
+                <div className="text-xs font-semibold" style={{ color: '#aaa' }}>{title}</div>
+                <div className="text-xs mt-0.5" style={{ color: '#444' }}>{desc}</div>
+              </div>
+            </div>
+          ))}
+        </div>
+
+        {/* Panic wipe */}
+        <div style={{ background: 'rgba(255,51,51,0.04)', border: '1px solid rgba(255,51,51,0.15)', borderRadius: 12, padding: '16px' }}>
+          <div className="flex items-center gap-2 mb-2">
+            <Icon name="trash" size={14} color="#ff3333" />
+            <span className="text-sm font-semibold" style={{ color: '#ff6666' }}>Panic Wipe</span>
+          </div>
+          <p className="text-xs mb-4" style={{ color: '#555', lineHeight: 1.6 }}>
+            Immediately clears all session data, messages, and connection state. Cannot be undone.
+          </p>
+          <button
+            onClick={handlePanic}
+            className="btn-red w-full py-3 rounded-xl text-sm font-semibold tracking-widest uppercase"
+            style={{ letterSpacing: '0.15em' }}
+            aria-label="Panic wipe — clear all session data">
+            ⚠ PANIC WIPE
+          </button>
+        </div>
+
+        {/* About */}
+        <div style={{ background: '#111', border: '1px solid #1e1e1e', borderRadius: 12, padding: '16px' }}>
+          <div className="flex items-center gap-2 mb-3">
+            <Icon name="ghost" size={14} color="#00ffff" />
+            <span className="text-sm font-semibold" style={{ color: '#e0e0e0' }}>About Ghost</span>
+          </div>
+          <div className="flex flex-col gap-2">
+            {[
+              ['Version', 'v1.0.0'],
+              ['License', 'Apache 2.0 · Open Source'],
+              ['Build', 'Single-file SPA · No backend'],
+            ].map(([k, v]) => (
+              <div key={k} className="flex justify-between">
+                <span className="text-xs" style={{ color: '#444' }}>{k}</span>
+                <span className="text-xs" style={{ color: '#666' }}>{v}</span>
+              </div>
+            ))}
+          </div>
+          <a href="https://github.com/tamoorhamid777-del/ghost-chat"
+             target="_blank" rel="noopener noreferrer"
+             className="flex items-center gap-2 mt-4 text-xs"
+             style={{ color: '#00ffff' }}>
+            <Icon name="github" size={14} color="#00ffff" />
+            github.com/tamoorhamid777-del/ghost-chat
+          </a>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+// ─── Nav Bar ──────────────────────────────────────────────────────────────────
+const NavBar = ({ tab, setTab, inChat }) => {
+  if (inChat) return null;
+  return (
+    <nav className="nav-bar" role="navigation" aria-label="Main navigation">
+      {[
+        { id: 'scan',     icon: 'radio',    label: 'Scan' },
+        { id: 'chat',     icon: 'message',  label: 'Chat' },
+        { id: 'settings', icon: 'settings', label: 'Settings' },
+      ].map(({ id, icon, label }) => (
+        <button key={id} className={`nav-item ${tab === id ? 'active' : ''}`}
+                onClick={() => setTab(id)}
+                aria-label={label} aria-current={tab === id ? 'page' : undefined}>
+          <Icon name={icon} size={20} />
+          <span>{label}</span>
+        </button>
+      ))}
+    </nav>
+  );
+};
+
+// ─── App Root ─────────────────────────────────────────────────────────────────
+const App = () => {
+  const [screen, setScreen] = useState('splash'); // splash | scanner | pairing | chat | main
+  const [tab, setTab] = useState('scan');
+  const [connectedDevice, setConnectedDevice] = useState(null);
+  const [defaultBurnSeconds, setDefaultBurnSeconds] = useState(10);
+  const [wipeOnDisconnect, setWipeOnDisconnect] = useState(true);
+  const [panicKey, setPanicKey] = useState(0); // force re-mount on panic
+
+  const handleStart = () => setScreen('main');
+
+  const handleConnect = (device) => {
+    setConnectedDevice(device);
+    setScreen('pairing');
+  };
+
+  const handlePaired = () => {
+    setScreen('chat');
+  };
+
+  const handleBackFromChat = () => {
+    if (wipeOnDisconnect) {
+      // Wipe: go back to scanner with fresh state
+      setConnectedDevice(null);
+      setPanicKey(k => k + 1);
+    }
+    setScreen('main');
+    setTab('scan');
+  };
+
+  const handlePanic = () => {
+    setConnectedDevice(null);
+    setPanicKey(k => k + 1);
+    if (screen === 'chat') {
+      setScreen('main');
+      setTab('scan');
+    }
+  };
+
+  // Splash
+  if (screen === 'splash') {
+    return (
+      <div className="app-shell">
+        <SplashScreen onStart={handleStart} />
+      </div>
+    );
+  }
+
+  // Pairing
+  if (screen === 'pairing') {
+    return (
+      <div className="app-shell">
+        <PairingScreen device={connectedDevice} onPaired={handlePaired} />
+      </div>
+    );
+  }
+
+  // Chat (full screen, no nav)
+  if (screen === 'chat') {
+    return (
+      <div className="app-shell">
+        <ChatScreen
+          key={panicKey}
+          device={connectedDevice}
+          defaultBurnSeconds={defaultBurnSeconds}
+          onBack={handleBackFromChat}
+        />
+      </div>
+    );
+  }
+
+  // Main app (scanner / settings with nav)
+  return (
+    <div className="app-shell">
+      <div className="flex-1 overflow-hidden" style={{ display: 'flex', flexDirection: 'column' }}>
+        {tab === 'scan' && (
+          <ScannerScreen key={panicKey} onConnect={handleConnect} />
+        )}
+        {tab === 'chat' && (
+          <div className="flex flex-col items-center justify-center flex-1 gap-4 px-6"
+               style={{ minHeight: '80vh' }}>
+            <Icon name="ghost" size={48} color="#1e1e1e" />
+            <p className="text-sm text-center" style={{ color: '#333', maxWidth: 220, lineHeight: 1.7 }}>
+              No active session. Scan for nearby devices to start a private chat.
+            </p>
+            <button className="btn-cyan px-6 py-2 rounded-xl text-xs"
+                    onClick={() => setTab('scan')}>
+              Go to Scanner
+            </button>
+          </div>
+        )}
+        {tab === 'settings' && (
+          <SettingsScreen
+            defaultBurnSeconds={defaultBurnSeconds}
+            setDefaultBurnSeconds={setDefaultBurnSeconds}
+            wipeOnDisconnect={wipeOnDisconnect}
+            setWipeOnDisconnect={setWipeOnDisconnect}
+            onPanic={handlePanic}
+          />
+        )}
+      </div>
+      <NavBar tab={tab} setTab={setTab} inChat={false} />
+    </div>
+  );
+};
+
+ReactDOM.createRoot(document.getElementById('root')).render(<App />);
+</script>
+</body>
+</html>
